@@ -7,7 +7,7 @@ they install with `npx skills add`, so treat every file here as a public API.
 
 | Skill | Category | Does |
 |---|---|---|
-| [`karavi-folder`](./karavi-folder/) | Pipeline / caretaker | Scaffolds the standard `karavi/` workspace tree (Section 1) and safely removes temporary data — logs, caches, build/publish artifacts (Section 2). |
+| [`karavi-folder`](./karavi-folder/) | Pipeline / caretaker | Scaffolds the standard `karavi/` workspace tree (Section 1) and safely removes temporary data — the four `karavi.temp.*` folders and caches (Section 2). |
 
 ## Choosing a Skill
 

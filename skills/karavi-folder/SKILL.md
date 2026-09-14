@@ -2,7 +2,7 @@
 name: karavi-folder
 description: >
   Scaffold the standard `karavi/` workspace tree in a repository and safely
-  remove temporary/interim data (logs, build/publish artifacts, caches, temp
+  remove temporary/interim data (logs, status, build/deploy output, caches, temp
   scripts) while preserving source, config, history, and READMEs.
   A two-section caretaker skill: (1) create the main karavi folders, (2) delete
   temporary files like caches and logs.
@@ -16,7 +16,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: akaravi
-  version: "0.1.0"
+  version: "0.2.0"
   category: workspace-caretaker
   tags: "karavi, folder, scaffold, cleanup, logs, cache, workspace, maintenance"
 compatibility: Cross-tool (Cursor, Claude Code, Antigravity, OpenCode, Codex, Cline). Idempotent. Deletes only gitignored/temp paths; never source.
@@ -30,7 +30,7 @@ temporary data. Two independent operations:
 | Section | Operation | Detail |
 |---|---|---|
 | 1 | Create the main `karavi/` folders | `references/folders.md` |
-| 2 | Delete temporary info — caches, logs, build/publish artifacts | `references/cleanup.md` |
+| 2 | Delete temporary info — temp folders, caches, logs | `references/cleanup.md` |
 
 ## Non-negotiable invariants
 
@@ -40,10 +40,13 @@ temporary data. Two independent operations:
   files is not.
 - **Preserve:** source code, config without secrets, `karavi.history/history.*.md`,
   and README files. These are never deleted.
-- **Deletable:** gitignored output (`karavi.logs/`, `karavi.*.files/`), temp
-  scripts (`_tmp-*`, `_fix-*`), process junk (`*.pid`, token dumps, stamp JSONs),
-  caches (`bin/`, `obj/`, `.dart_tool/`, `node_modules/.cache`, `.next/`), and
-  generated HTML reports.
+- **Deletable:** the four `karavi.temp.*` output folders and their contents —
+  logs, status reports, build output, deploy output — plus temp scripts
+  (`_tmp-*`, `_fix-*`), process junk (`*.pid`, token dumps, stamp JSONs), and
+  caches (`bin/`, `obj/`, `.dart_tool/`, `node_modules/.cache`, `.next/`).
+- **Git-clean:** the four `karavi.temp.*` folders are gitignored; their contents
+  are never committed, and `git status` stays clean of temp/generated files
+  under `karavi/`.
 - **Idempotent:** running twice yields the same state.
 - **Dry-run first:** for anything destructive, run `--what-if` and show the plan
   unless the user explicitly approved deletion.
@@ -52,45 +55,61 @@ temporary data. Two independent operations:
 
 Creates the canonical `karavi/` skeleton inside the repo root. Two scopes:
 
-- **Core (default)** — every karavi workspace has these:
-  `karavi.plans.prompt/{cursor,claude,other}`, `karavi.history`, `karavi.logs`,
-  `karavi.status`, `karavi.build.config`, `karavi.build.files`,
-  `karavi.deploy.config`, `karavi.deploy.files`, `karavi.publish.config`,
-  `karavi.publish.files`, `karavi.scripts.command`, `karavi.scripts.tools`.
-- **Full (`--full`)** — adds optional folders only when the project needs them:
-  `karavi.assets/{brand,icons,screenshots,templates}`, `karavi.doc/workflows`,
-  `karavi.BusinessModel.Doc`, `karavi.Customer.doc`, `karavi.plans.mockup`,
-  `karavi.scripts`, `karavi.SociaMediaContent`, `karavi.grafana.config`.
+- **Core (default)** — every karavi workspace has these **9 folders**:
+  `karavi.plans.prompt`, `karavi.history`, `karavi.deploy.config`,
+  `karavi.scripts.command`, `karavi.scripts.tools`, `karavi.temp.logs`,
+  `karavi.temp.status`, `karavi.temp.deploy`, `karavi.temp.build`.
+- **Full (`--full`)** — adds optional folders only when the project uses them:
+  `karavi.assets/{brand,icons,screenshots,templates}`, `karavi.mockup`,
+  `karavi.doc`, `karavi.BusinessModel.Doc`, `karavi.Customer.doc`,
+  `karavi.SociaMediaContent`.
 
-Full mechanics (per-folder purpose, `.gitignore` wiring, `.gitkeep`, and
-verification) are in `references/folders.md`.
+Complete per-folder descriptions and the recurring usage command are in
+`references/folders.md`.
 
 ## Section 2 — Delete temporary info
 
-Removes temporary/interim data created by runs, builds, and diagnostics. Two levels:
+The four `karavi.temp.*` folders hold temporary data. Two levels:
 
-- **Logs (default)** — the temp junk in `karavi.logs/` and run-stamp files:
-  `*.out.txt`, `*.err.txt`, `_tmp-*.ps1`, `_tmp-*.py`, `_fix-*.py`,
-  `*launch.ps1`, `*loop.ps1`, `*.pid`, token/state dumps
-  (`.browser-check-state.json`, `*.token.txt`, ...), and old stamp JSONs.
-- **Deep (`--deep`)** — everything in Logs plus build/publish artifacts and
-  caches: `karavi.build.files/`, `karavi.deploy.files/`, `karavi.publish.files/`,
-  `publish/`, `artifacts/`, `.run-logs/`, and per-stack caches
-  (`**/bin/`, `**/obj/`, `**/.dart_tool/`, `.next/`, `dist/`, `out/`).
+- **Logs (default)** — clear `karavi.temp.logs/` and `karavi.temp.status/`
+  (zero or old run-stamp junk: `*.out.txt`, `*.err.txt`, `_tmp-*`, `_fix-*`,
+  `*.pid`, token/state dumps, old HTML reports).
+- **Deep (`--deep`)** — everything above **plus** `karavi.temp.deploy/`,
+  `karavi.temp.build/`, repo-level output (`publish/`, `artifacts/`,
+  `.run-logs/`), and per-stack caches (`**/bin/`, `**/obj/`, `**/.dart_tool/`,
+  `.next/`, `dist/`, `out/`).
 
-Honor an existing `karavi.build.config/clean-manifest.json` when present. The
-full safe/unsafe matrix is in `references/cleanup.md`.
+The full safe/unsafe matrix is in `references/cleanup.md`.
+
+## Always-use command (دستور بکارگیری همیشگی)
+
+Keep the karavi structure present in **every** repository. This is the standing
+command to run when a repo is (re)initialized or the tree is missing:
+
+    /karavi-folder create --full
+
+Equivalent direct call (PowerShell, from the repo root after installing the skill):
+
+    & "karavi/karavi.scripts.command/karavi-folder.create.ps1" -Full
+
+Persian: `/karavi-folder ساخت --کامل`. Re-running is always safe and idempotent —
+it never deletes or overwrites existing content. See `references/folders.md`
+→ "Recurring usage" for the full habit.
 
 ## Invocation
 
 | Command | What it runs |
 |---|---|
-| `/karavi-folder create` | Section 1 — core skeleton |
+| `/karavi-folder create` | Section 1 — core skeleton (9 folders) |
 | `/karavi-folder create --full` | Section 1 — core + optional folders |
-| `/karavi-folder clean` | Section 2 — logs-level cleanup |
-| `/karavi-folder clean --deep` | Section 2 — deep cleanup (artifacts + caches) |
+| `/karavi-folder clean` | Section 2 — clear temp.logs + temp.status |
+| `/karavi-folder clean --deep` | Section 2 — deep cleanup (temp.deploy + temp.build + caches) |
 | `/karavi-folder clean --what-if` | Dry-run preview (deletes nothing) |
 | `/karavi-folder` (bare) | Ask which section, then run it |
+| `/karavi-folder help` | Show the complete user guide (`HELP.md`) |
+
+For the full user guide (folder catalog, walkthrough, troubleshooting, FAQ), run
+`/karavi-folder help` or open [`HELP.md`](./HELP.md).
 
 Persian: `/karavi-folder ساخت` (ایجاد فولدر), `/karavi-folder پاکسازی`
 (پاک کردن اطلاعات موقت؛ با `--عمیق` برای deep).
@@ -100,7 +119,7 @@ Persian: `/karavi-folder ساخت` (ایجاد فولدر), `/karavi-folder پا
 | Code | Meaning |
 |---|---|
 | 0 | Success. |
-| 1 | Precondition failed (no repo root found, or a required path/manifest is missing). |
+| 1 | Precondition failed (no repo root found, or a required path could not be created). |
 | 2 | User declined the destructive step after the dry-run preview. |
 | 3 | Refused: a target path is on the preserve list or resolves outside the repo. |
 

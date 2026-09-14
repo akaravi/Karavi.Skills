@@ -10,8 +10,8 @@
   Target repo root. Default: walk up from this script until a repo root
   (folder containing 'karavi') or '.git' is found.
 .PARAMETER Full
-  Also create optional folders (assets, doc, business model, social media,
-  grafana config, plans.mockup, scripts index).
+  Also create optional folders (assets, doc, business model, customer, mockup,
+  social media).
 .PARAMETER WhatIf
   Preview only; create nothing.
 .EXAMPLE
@@ -54,20 +54,15 @@ if (-not (Test-Path -LiteralPath $RepoRoot)) {
 $k = Join-Path $RepoRoot 'karavi'
 
 $core = @(
-    'karavi.plans.prompt/cursor',
-    'karavi.plans.prompt/claude',
-    'karavi.plans.prompt/other',
+    'karavi.plans.prompt',
     'karavi.history',
-    'karavi.logs',
-    'karavi.status',
-    'karavi.build.config',
-    'karavi.build.files',
     'karavi.deploy.config',
-    'karavi.deploy.files',
-    'karavi.publish.config',
-    'karavi.publish.files',
     'karavi.scripts.command',
-    'karavi.scripts.tools'
+    'karavi.scripts.tools',
+    'karavi.temp.logs',
+    'karavi.temp.status',
+    'karavi.temp.deploy',
+    'karavi.temp.build'
 )
 
 $optional = @(
@@ -75,13 +70,11 @@ $optional = @(
     'karavi.assets/icons',
     'karavi.assets/screenshots',
     'karavi.assets/templates',
-    'karavi.doc/workflows',
+    'karavi.mockup',
+    'karavi.doc',
     'karavi.BusinessModel.Doc',
     'karavi.Customer.doc',
-    'karavi.plans.mockup',
-    'karavi.scripts',
-    'karavi.SociaMediaContent',
-    'karavi.grafana.config'
+    'karavi.SociaMediaContent'
 )
 
 $created = 0

@@ -11,7 +11,7 @@ so treat every file here as a public API.
 
 | Skill | Does |
 |---|---|
-| `karavi-folder/` | Scaffolds the standard `karavi/` workspace tree and removes temporary data (logs, caches, build/publish artifacts). Two sections: create main folders, then delete temp info. |
+| `karavi-folder/` | Scaffolds the standard `karavi/` workspace tree and removes temporary data (the `karavi.temp.*` folders and caches). Two sections: create main folders, then delete temp info. |
 
 ## File layout
 

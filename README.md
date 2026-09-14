@@ -18,7 +18,7 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
 
 | مهارت | دسته | کارکرد |
 |---|---|---|
-| [`karavi-folder`](./skills/karavi-folder/) | Pipeline / caretaker | اسکلت استاندارد `karavi/` را می‌سازد (بخش ۱) و اطلاعات موقت — لاگ، کش، آرت‌فکت build/publish — را به‌شکل امن حذف می‌کند (بخش ۲). |
+| [`karavi-folder`](./skills/karavi-folder/) | Pipeline / caretaker | اسکلت استاندارد `karavi/` را می‌سازد (بخش ۱) و اطلاعات موقت — چهار فولدر `karavi.temp.*` (لاگ، وضعیت، build، deploy) و کش — را به‌شکل امن پاک می‌کند (بخش ۲). |
 
 ## انتخاب مهارت
 

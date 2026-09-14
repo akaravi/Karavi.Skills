@@ -3,12 +3,13 @@
 .SYNOPSIS
   Section 2 of the karavi-folder skill: remove temporary/interim data.
 .DESCRIPTION
-  Logs-level (default) clears temp junk in karavi.logs\ and run-stamp files.
-  Deep (-Deep) also removes build/publish artifacts and caches. Never touches
-  source, config, history, or READMEs. Honors karavi.build.config/clean-manifest.json
-  when present. Preserve listed paths are never removed.
+  Logs/status-level (default) clears temp junk in karavi.temp.logs\ and
+  karavi.temp.status\.
+  Deep (-Deep) also clears karavi.temp.deploy\, karavi.temp.build\, repo-level
+  output, and per-stack caches. Never touches source, config, history, or
+  READMEs. Only the karavi.temp.* folders are deletable.
 .PARAMETER Deep
-  Also remove build/publish artifacts and per-stack caches.
+  Also clear karavi.temp.deploy, karavi.temp.build, repo-level output, and caches.
 .PARAMETER WhatIf
   Preview only; delete nothing.
 .PARAMETER RepoRoot
@@ -56,9 +57,11 @@ $k = Join-Path $repo 'karavi'
 
 # --- Preserve whitelist: these are NEVER removed ------------------------------
 $preservePatterns = @(
-    '*karavi.history*', '*karavi.deploy.config*', '*karavi.build.config*',
-    '*karavi.publish.config*', '*karavi.scripts*', '*karavi.doc*',
-    '*karavi.assets*', '*karavi.plans.prompt*', '*.gitkeep', '*README.md'
+    '*karavi.history*', '*karavi.deploy.config*', '*karavi.plans.prompt*',
+    '*karavi.scripts.command*', '*karavi.scripts.tools*', '*karavi.assets*',
+    '*karavi.mockup*', '*karavi.doc*', '*karavi.BusinessModel.Doc*',
+    '*karavi.Customer.doc*', '*karavi.SociaMediaContent*', '*.gitkeep',
+    '*README.md'
 )
 
 function Test-Preserved {
@@ -69,35 +72,38 @@ function Test-Preserved {
     return $false
 }
 
-# --- Logs-level: temp junk in karavi.logs\ and run-stamp files ---------------
-$logsDir = Join-Path $k 'karavi.logs'
-if (Test-Path -LiteralPath $logsDir) {
-    $logPatterns = @(
-        '*.out.txt', '*.err.txt', '_tmp-*.ps1', '_tmp-*.py', '_fix-*.py',
-        '*launch.ps1', '*loop.ps1', '*run.ps1', '*.pid', '*.token.txt',
-        '.browser-check-state.json', '*-state.json', '*.http.json', '*.json'
-    )
-    foreach ($pat in $logPatterns) {
-        if ($WhatIf -or $Deep) {
-            Get-ChildItem -LiteralPath $logsDir -Filter $pat -File -ErrorAction SilentlyContinue |
-                ForEach-Object { if (-not (Test-Preserved $_.FullName)) {
-                    if ($WhatIf) { Write-Host "[WhatIf] Remove: $($_.FullName)" }
-                    else { Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue; Write-Host "Removed: $($_.FullName)" } } }
-        }
-        else {
-            Get-ChildItem -LiteralPath $logsDir -Filter $pat -File -ErrorAction SilentlyContinue |
-                ForEach-Object { if (-not (Test-Preserved $_.FullName)) {
-                    Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue } }
+# --- Default: temp junk in karavi.temp.logs\ and karavi.temp.status\ ----------
+$logsDir = Join-Path $k 'karavi.temp.logs'
+$statusDir = Join-Path $k 'karavi.temp.status'
+foreach ($dir in @($logsDir, $statusDir)) {
+    if (Test-Path -LiteralPath $dir) {
+        $logPatterns = @(
+            '*.out.txt', '*.err.txt', '_tmp-*.ps1', '_tmp-*.py', '_fix-*.py',
+            '*launch.ps1', '*loop.ps1', '*run.ps1', '*.pid', '*.token.txt',
+            '.browser-check-state.json', '*-state.json', '*.http.json', '*.json',
+            '*.html'
+        )
+        foreach ($pat in $logPatterns) {
+            if ($WhatIf -or $Deep) {
+                Get-ChildItem -LiteralPath $dir -Filter $pat -File -ErrorAction SilentlyContinue |
+                    ForEach-Object { if (-not (Test-Preserved $_.FullName)) {
+                        if ($WhatIf) { Write-Host "[WhatIf] Remove: $($_.FullName)" }
+                        else { Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue; Write-Host "Removed: $($_.FullName)" } } }
+            }
+            else {
+                Get-ChildItem -LiteralPath $dir -Filter $pat -File -ErrorAction SilentlyContinue |
+                    ForEach-Object { if (-not (Test-Preserved $_.FullName)) {
+                        Remove-Item -LiteralPath $_.FullName -Force -ErrorAction SilentlyContinue } }
+            }
         }
     }
 }
 
-# --- Deep: build/publish artifacts and caches --------------------------------
+# --- Deep: build/deploy temp output, repo-level output, and caches ------------
 if ($Deep) {
     $deepDirs = @(
-        (Join-Path $k 'karavi.build.files'),
-        (Join-Path $k 'karavi.deploy.files'),
-        (Join-Path $k 'karavi.publish.files')
+        (Join-Path $k 'karavi.temp.build'),
+        (Join-Path $k 'karavi.temp.deploy')
     )
     foreach ($target in $deepDirs) {
         if (-not (Test-Path -LiteralPath $target)) { continue }
