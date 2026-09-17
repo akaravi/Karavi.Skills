@@ -6,7 +6,7 @@
   Scaffolds the canonical karavi/ workspace tree in a repo root.
   Scans and migrates existing legacy/variant folder structures inside karavi/
   by renaming and relocating them to the new standard paths without data loss.
-  Default structure is Full (18 standard folders).
+  Default structure is Full (20 standard folders/subfolders).
 .PARAMETER RepoRoot
   Target repo root. Default: walk up from this script until a folder containing
   '.git' or 'karavi' is found.
@@ -88,7 +88,9 @@ $optionalFolders = @(
     'karavi.doc',
     'karavi.BusinessModel.Doc',
     'karavi.Customer.doc',
-    'karavi.SociaMediaContent'
+    'karavi.OnlineContent/SociaMediaContent',
+    'karavi.OnlineContent/WordPressContent',
+    'karavi.OnlineContent/LinkedinConetnt'
 )
 
 # --- Legacy Folder Migration Mapping -------------------------------------------
@@ -113,12 +115,20 @@ $migrationMap = [ordered]@{
     'karavi.deploy'              = 'karavi.deploy.config'
     'karavi.config'              = 'karavi.deploy.config'
     'deploy-config'              = 'karavi.deploy.config'
+    'karavi.build.config'        = 'karavi.deploy.config'
+    'build.config'               = 'karavi.deploy.config'
+    'build-config'               = 'karavi.deploy.config'
     'commands'                   = 'karavi.scripts.command'
     'scripts.command'            = 'karavi.scripts.command'
     'karavi.commands'            = 'karavi.scripts.command'
+    'karavi.scripts'             = 'karavi.scripts.command'
     'tools'                      = 'karavi.scripts.tools'
     'scripts.tools'              = 'karavi.scripts.tools'
     'karavi.tools'               = 'karavi.scripts.tools'
+    'karavi.tmp'                 = 'karavi.temp.logs'
+    'tmp'                        = 'karavi.temp.logs'
+    'karavi.temp'                = 'karavi.temp.logs'
+    'temp'                       = 'karavi.temp.logs'
     'logs'                       = 'karavi.temp.logs'
     'temp.logs'                  = 'karavi.temp.logs'
     'karavi.logs'                = 'karavi.temp.logs'
@@ -148,11 +158,21 @@ $migrationMap = [ordered]@{
     'customers'                  = 'karavi.Customer.doc'
     'karavi.customer'            = 'karavi.Customer.doc'
     'Customer.doc'               = 'karavi.Customer.doc'
-    'social'                     = 'karavi.SociaMediaContent'
-    'socialmedia'                = 'karavi.SociaMediaContent'
-    'karavi.social'              = 'karavi.SociaMediaContent'
-    'karavi.socialmedia'         = 'karavi.SociaMediaContent'
-    'SocialMediaContent'         = 'karavi.SociaMediaContent'
+    'karavi.SociaMediaContent'   = 'karavi.OnlineContent/SociaMediaContent'
+    'SociaMediaContent'          = 'karavi.OnlineContent/SociaMediaContent'
+    'karavi.SocialMediaContent'  = 'karavi.OnlineContent/SociaMediaContent'
+    'SocialMediaContent'         = 'karavi.OnlineContent/SociaMediaContent'
+    'social'                     = 'karavi.OnlineContent/SociaMediaContent'
+    'socialmedia'                = 'karavi.OnlineContent/SociaMediaContent'
+    'karavi.social'              = 'karavi.OnlineContent/SociaMediaContent'
+    'karavi.socialmedia'         = 'karavi.OnlineContent/SociaMediaContent'
+    'OnlineContent'              = 'karavi.OnlineContent'
+    'karavi.OnlineContent'       = 'karavi.OnlineContent'
+    'wordpress'                  = 'karavi.OnlineContent/WordPressContent'
+    'WordPressContent'           = 'karavi.OnlineContent/WordPressContent'
+    'linkedin'                   = 'karavi.OnlineContent/LinkedinConetnt'
+    'LinkedinContent'            = 'karavi.OnlineContent/LinkedinConetnt'
+    'LinkedinConetnt'            = 'karavi.OnlineContent/LinkedinConetnt'
 }
 
 function Invoke-Migration {
@@ -202,7 +222,21 @@ function Invoke-Migration {
         }
     }
 
-    # 3. Check all direct children of karavi/ against migration map
+    # 3. Handle legacy karavi.SociaMediaContent -> karavi.OnlineContent/SociaMediaContent
+    $legacySocialPaths = @(
+        (Join-Path $k 'karavi.SociaMediaContent'),
+        (Join-Path $k 'karavi.SocialMediaContent'),
+        (Join-Path $k 'SociaMediaContent'),
+        (Join-Path $k 'SocialMediaContent')
+    )
+    foreach ($lsp in $legacySocialPaths) {
+        if (Test-Path -LiteralPath $lsp) {
+            $targetSocialDst = Join-Path (Join-Path $k 'karavi.OnlineContent') 'SociaMediaContent'
+            $migrated += Move-DirectoryContent -Source $lsp -Destination $targetSocialDst
+        }
+    }
+
+    # 4. Check all direct children of karavi/ against migration map
     $children = Get-ChildItem -LiteralPath $k -Directory -ErrorAction SilentlyContinue
     foreach ($child in $children) {
         $name = $child.Name
@@ -211,7 +245,7 @@ function Invoke-Migration {
             $targetPath = Join-Path $k ($targetRel -replace '/', [IO.Path]::DirectorySeparatorChar)
             
             # If the legacy folder name is not already identical to the target folder
-            if ($child.FullName -ne $targetPath) {
+            if ($child.FullName -ne $targetPath -and (Test-Path -LiteralPath $child.FullName)) {
                 $migrated += Move-DirectoryContent -Source $child.FullName -Destination $targetPath
             }
         }
@@ -343,7 +377,7 @@ if (Test-Path -LiteralPath $gitignorePath) {
 }
 
 Write-Host "karavi-folder init completed successfully."
-Write-Host "Mode: $(if ($Core) { 'Core (9 folders)' } else { 'Full (18 folders - Default)' })"
+Write-Host "Mode: $(if ($Core) { 'Core (9 folders)' } else { 'Full (20 folders/subfolders - Default)' })"
 Write-Host "Migrated/Relocated items: $migratedCount"
 Write-Host "Created folders: $createdCount"
 Write-Host "Root: $k"

@@ -6,7 +6,7 @@ Pipeline / caretaker skill that initializes, migrates, and maintains the standar
 It performs two primary operations:
 
 1. **Initialize & Create main folders** (`init` / `create`) — Scaffold the canonical
-   `karavi/` tree (**Full by default: 18 folders**) and automatically **detect, rename,
+   `karavi/` tree (**Full by default: 20 folders & subfolders**) and automatically **detect, rename,
    and migrate** any existing or legacy folders inside `karavi/` to the new standard.
 2. **Delete temporary info** (`clean`) — Remove temporary logs, status reports, build/deploy
    output, and stack caches while strictly preserving source, history, and configs.
@@ -17,7 +17,7 @@ It performs two primary operations:
 
 ---
 
-## Canonical Folders (Full Structure by Default — 18 Folders)
+## Canonical Folders (Full Structure by Default — 20 Folders & Subfolders)
 
 | Folder | Purpose |
 |---|---|
@@ -35,7 +35,9 @@ It performs two primary operations:
 | `karavi.doc` | Technical, architectural, and operator docs |
 | `karavi.BusinessModel.Doc` | Business model and commercial documentation |
 | `karavi.Customer.doc` | Customer feedback and pre-execution planning |
-| `karavi.SociaMediaContent` | Social media content and media assets |
+| `karavi.OnlineContent/SociaMediaContent` | Social media content and campaign assets |
+| `karavi.OnlineContent/WordPressContent` | WordPress posts, pages, and website content |
+| `karavi.OnlineContent/LinkedinConetnt` | LinkedIn articles, posts, and professional networking content |
 
 ---
 
@@ -43,7 +45,7 @@ It performs two primary operations:
 
 When running `init` or `create`, any existing folders inside `karavi/` with legacy or variant names
 (e.g., `docs`, `prompts`, `history`, `deploy`, `scripts/command`, `logs`, `status`, `build`, `assets`,
-`mockup`, `business`, `customer`, `social`) are **automatically detected, renamed, and relocated**
+`mockup`, `business`, `customer`, `social`, `karavi.SociaMediaContent`, `OnlineContent`, `wordpress`, `linkedin`) are **automatically detected, renamed, and relocated**
 into the new standard structure without deleting or losing any content.
 
 ---
@@ -65,14 +67,13 @@ Persian: `/karavi-folder شروع` یا `/karavi-folder ایجاد و بازسا
 ```bash
 npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
 ```
-
 ---
 
 ## Invocation
 
 | Command | What it runs |
 |---|---|
-| `/karavi-folder init` | Full initialization (18 folders) + migrate legacy folders (Default) |
+| `/karavi-folder init` | Full initialization (20 folders/subfolders) + migrate legacy folders (Default) |
 | `/karavi-folder init --core` | Core initialization (9 folders) + migrate legacy folders |
 | `/karavi-folder create` | Full structure creation & migration (Default) |
 | `/karavi-folder clean` | Clear temp.logs + temp.status |

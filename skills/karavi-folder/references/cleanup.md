@@ -16,7 +16,7 @@ while **never touching source, config, history, or READMEs**.
   - `karavi/karavi.deploy.config/` (and `karavi.scripts.command`, `karavi.scripts.tools`)
   - `karavi/karavi.plans.prompt/`, `karavi/karavi.assets/`, `karavi/karavi.mockup/`,
     `karavi/karavi.doc/`, `karavi/karavi.BusinessModel.Doc/`,
-    `karavi/karavi.Customer.doc/`, `karavi/karavi.SociaMediaContent/`
+    `karavi/karavi.Customer.doc/`, `karavi/karavi.OnlineContent/`
   - All `README.md`, all `.gitkeep`, all committed source.
 - **Git-clean:** the `karavi.temp.*` contents are gitignored and never committed;
   after cleanup `git status` has no temporary/generated files under `karavi/`.

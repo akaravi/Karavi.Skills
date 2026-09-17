@@ -60,8 +60,8 @@ $preservePatterns = @(
     '*karavi.history*', '*karavi.deploy.config*', '*karavi.plans.prompt*',
     '*karavi.scripts.command*', '*karavi.scripts.tools*', '*karavi.assets*',
     '*karavi.mockup*', '*karavi.doc*', '*karavi.BusinessModel.Doc*',
-    '*karavi.Customer.doc*', '*karavi.SociaMediaContent*', '*.gitkeep',
-    '*README.md'
+    '*karavi.Customer.doc*', '*karavi.OnlineContent*', '*karavi.SociaMediaContent*',
+    '*.gitkeep', '*README.md'
 )
 
 function Test-Preserved {

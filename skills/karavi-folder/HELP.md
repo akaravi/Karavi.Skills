@@ -29,8 +29,7 @@ folder trees, and safely cleans temporary data.
 
 ---
 
-## ۲) فولدرهای استاندارد (پیش‌فرض: کامل / Full — ۱۸ فولدر)
-
+## ۲) فولدرهای استاندارد (پیش‌فرض: کامل / Full — ۲۰ فولدر و زیرفولدر)
 | # | مسیر فولدر | کاربرد |
 |---|---|---|
 | ۱ | `karavi/karavi.plans.prompt` | پرامپت‌ها، قوانین و پلن‌های تمامی ایجنت‌ها و دستیارها (Cursor/Claude/سایر) |
@@ -50,7 +49,9 @@ folder trees, and safely cleans temporary data.
 | ۱۵ | `karavi/karavi.doc` | مستندات فنی، معماری و راهنماهای پروژه |
 | ۱۶ | `karavi/karavi.BusinessModel.Doc` | مستندات مدل کسب‌وکار، استراتژی و اهداف تجاری |
 | ۱۷ | `karavi/karavi.Customer.doc` | مستندات شناخت مشتری، پرسونای کاربر و بازخوردها |
-| ۱۸ | `karavi/karavi.SociaMediaContent` | محتواها و تصاویر شبکه‌های اجتماعی |
+| ۱۸ | `karavi/karavi.OnlineContent/SociaMediaContent` | محتواها، بنرها و پست‌های شبکه‌های اجتماعی |
+| ۱۹ | `karavi/karavi.OnlineContent/WordPressContent` | مقالات، صفحات و محتواهای سایت وردپرس |
+| ۲۰ | `karavi/karavi.OnlineContent/LinkedinConetnt` | مقالات و محتواهای تخصصی لینکدین |
 
 ---
 
@@ -74,7 +75,9 @@ folder trees, and safely cleans temporary data.
 | `doc`, `docs`, `karavi.docs`, `documentation` | `karavi.doc` |
 | `business`, `businessmodel`, `karavi.business`, `BusinessModel.Doc` | `karavi.BusinessModel.Doc` |
 | `customer`, `customers`, `karavi.customer`, `Customer.doc` | `karavi.Customer.doc` |
-| `social`, `socialmedia`, `karavi.social`, `SocialMediaContent` | `karavi.SociaMediaContent` |
+| `social`, `socialmedia`, `karavi.social`, `SocialMediaContent`, `karavi.SociaMediaContent`, `SociaMediaContent` | `karavi.OnlineContent/SociaMediaContent` |
+| `wordpress`, `WordPressContent`, `wordpresscontent` | `karavi.OnlineContent/WordPressContent` |
+| `linkedin`, `LinkedinContent`, `LinkedinConetnt`, `linkedincontent` | `karavi.OnlineContent/LinkedinConetnt` |
 
 ---
 
@@ -82,7 +85,7 @@ folder trees, and safely cleans temporary data.
 
 | دستور | اثر |
 |---|---|
-| `/karavi-folder init` | **مقداردهی اولیه کامل (۱۸ فولدر پیش‌فرض) + مهاجرت و تغییر نام فولدرهای قبلی** |
+| `/karavi-folder init` | **مقداردهی اولیه کامل (۲۰ فولدر/زیرفولدر پیش‌فرض) + مهاجرت و تغییر نام فولدرهای قبلی** |
 | `/karavi-folder init --core` | مقداردهی اولیه فقط ۹ فولدر پایه + مهاجرت |
 | `/karavi-folder create` | ساخت ساختار کامل و مهاجرت (همانند init) |
 | `/karavi-folder clean` | پاک‌سازی `karavi.temp.logs` و `karavi.temp.status` |
@@ -140,7 +143,7 @@ folder trees, and safely cleans temporary data.
 - فایل‌های تنظیمات `karavi.deploy.config/`
 - پلن‌ها و پرامپت‌های `karavi.plans.prompt/`
 - دستورات و اسکریپت‌ها `karavi.scripts.*`
-- مستندات `karavi.doc/`, `karavi.BusinessModel.Doc/`, `karavi.Customer.doc/`, `karavi.SociaMediaContent/`
+- مستندات `karavi.doc/`, `karavi.BusinessModel.Doc/`, `karavi.Customer.doc/`, `karavi.OnlineContent/`
 - دارایی‌ها و موکاپ‌ها `karavi.assets/`, `karavi.mockup/`
 - تمام فایل‌های `README.md` و `.gitkeep`
 

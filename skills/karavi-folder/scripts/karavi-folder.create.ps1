@@ -98,7 +98,9 @@ $optional = @(
     'karavi.doc',
     'karavi.BusinessModel.Doc',
     'karavi.Customer.doc',
-    'karavi.SociaMediaContent'
+    'karavi.OnlineContent/SociaMediaContent',
+    'karavi.OnlineContent/WordPressContent',
+    'karavi.OnlineContent/LinkedinConetnt'
 )
 
 $isFull = (-not $Core)

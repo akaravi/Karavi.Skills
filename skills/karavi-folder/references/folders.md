@@ -10,14 +10,13 @@ Mechanics behind `/karavi-folder init` and `/karavi-folder create`.
 planning, technical & business documentation, history, scripts, tools, logs, status, build, and deploy.
 
 ### Non-Negotiable Defaults
-1. **Full Structure by Default:** Every initialization creates all **18 canonical folders** (Core + Extended). Core-only is available only if explicitly requested (`--core`).
+1. **Full Structure by Default:** Every initialization creates all **20 canonical folders & subfolders** (Core + Extended). Core-only is available only if explicitly requested (`--core`).
 2. **Automatic Migration & Renaming:** If the repository already contains folders under `karavi/` with legacy or variant names, they are **automatically detected, renamed, and relocated** into the new standard structure without deleting or losing any files.
 3. **Local to Current Repo:** Freshly scaffolded inside the current repository root. Never imports from or copies another project.
 
 ---
 
-## Canonical Folder Structure (Full — Default: 18 Folders)
-
+## Canonical Folder Structure (Full — Default: 20 Folders & Subfolders)
 | # | Canonical Path | Description |
 |---|---|---|
 | 1 | `karavi/karavi.plans.prompt` | Prompts, reusable JSON rules, and Agent plans for **all** assistants (Cursor, Claude, Antigravity, OpenCode, Codex, Cline) in one place. Store `Karavi.NNN.plan.md` flat here. |
@@ -37,7 +36,9 @@ planning, technical & business documentation, history, scripts, tools, logs, sta
 | 15 | `karavi/karavi.doc` | General technical, architectural, and operator documentation. |
 | 16 | `karavi/karavi.BusinessModel.Doc` | Business model, revenue plans, commercial strategy, and requirements. |
 | 17 | `karavi/karavi.Customer.doc` | Customer personas, user research, feedback, and pre-execution planning. |
-| 18 | `karavi/karavi.SociaMediaContent` | Social media posts, banners, marketing materials, and campaign content. |
+| 18 | `karavi/karavi.OnlineContent/SociaMediaContent` | Social media posts, banners, marketing materials, and campaign content. |
+| 19 | `karavi/karavi.OnlineContent/WordPressContent` | WordPress posts, pages, and website content. |
+| 20 | `karavi/karavi.OnlineContent/LinkedinConetnt` | LinkedIn articles, posts, and professional networking content. |
 
 ---
 
@@ -64,7 +65,9 @@ When `init` or `create` runs, the AI agent and the scripts scan `karavi/` for an
 | `doc`, `docs`, `karavi.docs`, `documentation`, `karavi.documentation` | `karavi/karavi.doc` |
 | `BusinessModel`, `business`, `businessmodel`, `karavi.business`, `karavi.businessmodel`, `BusinessModel.Doc` | `karavi/karavi.BusinessModel.Doc` |
 | `customer`, `customers`, `karavi.customer`, `Customer`, `Customer.doc` | `karavi/karavi.Customer.doc` |
-| `social`, `socialmedia`, `karavi.social`, `karavi.socialmedia`, `SocialMediaContent` | `karavi/karavi.SociaMediaContent` |
+| `social`, `socialmedia`, `karavi.social`, `karavi.socialmedia`, `SocialMediaContent`, `karavi.SociaMediaContent`, `SociaMediaContent` | `karavi/karavi.OnlineContent/SociaMediaContent` |
+| `wordpress`, `WordPressContent`, `wordpresscontent` | `karavi/karavi.OnlineContent/WordPressContent` |
+| `linkedin`, `LinkedinContent`, `LinkedinConetnt`, `linkedincontent` | `karavi/karavi.OnlineContent/LinkedinConetnt` |
 
 ---
 
@@ -82,7 +85,7 @@ When executing `/karavi-folder init` or `/karavi-folder create`:
    - If the canonical target already exists, move each item inside the legacy directory into the canonical target, preserving all files. If a filename collision occurs, rename the incoming file with a `.legacy-*` suffix rather than overwriting.
    - Remove the empty legacy folder once emptied.
 4. **Scaffold Missing Folders (Full by default):**
-   Ensure all 18 canonical folders exist. Create any folder that is missing.
+   Ensure all 20 canonical folders/subfolders exist. Create any folder that is missing.
 5. **Place Sentinel `.gitkeep`:**
    Add `.gitkeep` inside empty tracking/temp folders so git tracks directory structure.
 6. **Wire `.gitignore`:**
@@ -111,8 +114,7 @@ karavi/karavi.deploy.config/deploy.secrets.json
 
 ## Verification Checklist
 
-After running `init` or `create`:
-- [ ] All 18 canonical folders exist under `karavi/`.
+- [ ] All 20 canonical folders & subfolders exist under `karavi/`.
 - [ ] No old/legacy unmapped folders remain in `karavi/`.
 - [ ] Existing history, documentation, prompts, and configs have been migrated intact.
 - [ ] `.gitignore` contains the `# --- karavi ---` block.

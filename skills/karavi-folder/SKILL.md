@@ -42,10 +42,10 @@ temporary data. Two primary operations:
 
 When the user requests `/karavi-folder init`, `/karavi-folder create`, or asks to set up/rebuild the `karavi/` workspace:
 
-1. **Default to the FULL structure (18 canonical folders):**
+1. **Default to the FULL structure (20 canonical folders/subfolders):**
    Unless the user explicitly specifies `--core`, always scaffold all core and extended folders.
 2. **Detect & Migrate Existing/Legacy Folders:**
-   Actively scan `karavi/` for any existing folders or legacy naming/locations (e.g. `doc`, `docs`, `prompts`, `plans`, `history`, `deploy`, `scripts`, `tools`, `logs`, `status`, `build`, `assets`, `mockup`, `business`, `customer`, `social`, etc.).
+   Actively scan `karavi/` for any existing folders or legacy naming/locations (e.g. `doc`, `docs`, `prompts`, `plans`, `history`, `deploy`, `scripts`, `tools`, `logs`, `status`, `build`, `assets`, `mockup`, `business`, `customer`, `social`, `karavi.SociaMediaContent`, `OnlineContent`, etc.).
 3. **Rename & Relocate to Canonical Names:**
    Rename and move existing legacy folders and their contents into the new canonical standard locations without deleting or losing any content or history.
 4. **Wire Gitignore & Gitkeep:**
@@ -55,7 +55,7 @@ When the user requests `/karavi-folder init`, `/karavi-folder create`, or asks t
 
 ## Non-negotiable invariants
 
-- **Default is Full structure:** All 18 canonical folders are scaffolded by default.
+- **Default is Full structure:** All 20 canonical folders/subfolders are scaffolded by default.
 - **Safe migration & renaming:** Existing folders and files under `karavi/` are detected, renamed, and migrated into the canonical structure without data loss.
 - **No cross-project import:** Create/clean **inside the current repo only**; never copy `karavi/` from another repository.
 - **Preserve whitelist:** Source code, config without secrets, `karavi.history/history.*.md`, and README files are never deleted.
@@ -70,7 +70,7 @@ When the user requests `/karavi-folder init`, `/karavi-folder create`, or asks t
 
 Scaffolds the canonical `karavi/` skeleton inside the repo root and migrates any existing legacy folders.
 
-### Canonical Folder Structure (Full — Default: 18 Folders)
+### Canonical Folder Structure (Full — Default: 20 Folders & Subfolders)
 
 | Folder | Purpose |
 |---|---|
@@ -91,8 +91,9 @@ Scaffolds the canonical `karavi/` skeleton inside the repo root and migrates any
 | `karavi.doc` | General technical and operator documentation |
 | `karavi.BusinessModel.Doc` | Business model and commercial documentation |
 | `karavi.Customer.doc` | Customer and pre-execution planning documentation |
-| `karavi.SociaMediaContent` | Social media content and media assets |
-
+| `karavi.OnlineContent/SociaMediaContent` | Social media content and campaign assets |
+| `karavi.OnlineContent/WordPressContent` | WordPress posts, pages, and website content |
+| `karavi.OnlineContent/LinkedinConetnt` | LinkedIn articles, posts, and professional content |
 Complete per-folder descriptions, legacy migration mapping, and step-by-step rules are in `references/folders.md`.
 
 ---
