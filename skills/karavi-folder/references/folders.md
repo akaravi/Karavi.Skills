@@ -1,96 +1,103 @@
-# Section 1 — Create the main `karavi/` folders
+# Section 1 — Initialize, Scaffold & Migrate the `karavi/` Workspace
 
-Mechanics behind `/karavi-folder create`. Loaded only when this section runs.
+Mechanics behind `/karavi-folder init` and `/karavi-folder create`.
 
-## Purpose
+---
 
-`karavi/` is the single focal point in **every** repo for the operator/agent:
-planning, technical & business docs, history, logs, status, build, and deploy.
-This skill creates the tree **fresh inside the current repo** — it never imports
-from, or copies, another project.
+## Purpose & Scope
 
-## Where it goes
+`karavi/` is the single focal point in **every** repository for the operator and AI agents:
+planning, technical & business documentation, history, scripts, tools, logs, status, build, and deploy.
 
-The skeleton is created under the **repository root** (the folder that contains
-`.git` or that already owns a `karavi/`). Resolve the root with
-`karavi.scripts.tools/workspace.paths.ps1` (`Get-RepoRootFromKaraviScript`) when
-present; otherwise the agent locates the repo root itself (walk up from CWD until
-it finds `.git`).
+### Non-Negotiable Defaults
+1. **Full Structure by Default:** Every initialization creates all **18 canonical folders** (Core + Extended). Core-only is available only if explicitly requested (`--core`).
+2. **Automatic Migration & Renaming:** If the repository already contains folders under `karavi/` with legacy or variant names, they are **automatically detected, renamed, and relocated** into the new standard structure without deleting or losing any files.
+3. **Local to Current Repo:** Freshly scaffolded inside the current repository root. Never imports from or copies another project.
 
-## Core folders (always create) — with complete description
+---
 
-| Folder | Purpose |
+## Canonical Folder Structure (Full — Default: 18 Folders)
+
+| # | Canonical Path | Description |
+|---|---|---|
+| 1 | `karavi/karavi.plans.prompt` | Prompts, reusable JSON rules, and Agent plans for **all** assistants (Cursor, Claude, Antigravity, OpenCode, Codex, Cline) in one place. Store `Karavi.NNN.plan.md` flat here. |
+| 2 | `karavi/karavi.history` | Change history of the project. One file per day: `history.YYYY-MM-DD.md`. Never deleted. |
+| 3 | `karavi/karavi.deploy.config` | Deploy & FTP configuration for this repo: `production-hosts.json`, `deploy-targets.json`, `local-dev-ports.json`, `Deploy_FTP.info`, secrets. Public JSON tracked; real credentials gitignored. |
+| 4 | `karavi/karavi.scripts.command` | Operator and agent **command entry points** (deploy, run all, clean, history.write, ...). |
+| 5 | `karavi/karavi.scripts.tools` | Tooling **helpers** (verify structure, path resolvers, build pieces, `verify-gates.json`, ...). Reused by scripts.command. |
+| 6 | `karavi/karavi.temp.logs` | **Temporary** local logs and captured run output (gitignored). Cleared by `clean`. |
+| 7 | `karavi/karavi.temp.status` | **Temporary** execution/deploy status reports (HTML/JSON) (gitignored). Cleared by `clean`. |
+| 8 | `karavi/karavi.temp.deploy` | **Temporary** release output staged, ready to deploy (gitignored). Cleared by `clean --deep`. |
+| 9 | `karavi/karavi.temp.build` | **Temporary** build output (gitignored). Cleared by `clean --deep`. |
+| 10 | `karavi/karavi.assets/brand` | Brand assets, logos, color palettes, and styling guidelines. |
+| 11 | `karavi/karavi.assets/icons` | Project icon sets, SVGs, and favicon assets. |
+| 12 | `karavi/karavi.assets/screenshots` | UI screenshots, design previews, and workflow captures. |
+| 13 | `karavi/karavi.assets/templates` | Document and code templates for the workspace. |
+| 14 | `karavi/karavi.mockup` | UI mockups, wireframes, and design reference files. |
+| 15 | `karavi/karavi.doc` | General technical, architectural, and operator documentation. |
+| 16 | `karavi/karavi.BusinessModel.Doc` | Business model, revenue plans, commercial strategy, and requirements. |
+| 17 | `karavi/karavi.Customer.doc` | Customer personas, user research, feedback, and pre-execution planning. |
+| 18 | `karavi/karavi.SociaMediaContent` | Social media posts, banners, marketing materials, and campaign content. |
+
+---
+
+## Legacy Folder Migration & Renaming (مهاجرت و تغییر نام فولدرها)
+
+When `init` or `create` runs, the AI agent and the scripts scan `karavi/` for any legacy/variant directories and relocate them to the standard canonical paths.
+
+### Migration Mapping Table
+
+| Existing / Legacy Folder Name in `karavi/` | Target Canonical Folder |
 |---|---|
-| `karavi/karavi.plans.prompt` | Prompts, reusable JSON rules, and Agent plans for **all** assistants (Cursor, Claude, other) in one place. No per-tool subfolders — put `Karavi.NNN.plan.md` files here flat. |
-| `karavi/karavi.history` | Change history of the project. One file per day: `history.YYYY-MM-DD.md`. Never deleted. |
-| `karavi/karavi.deploy.config` | Deploy & FTP configuration for **this** repo: `production-hosts.json`, `deploy-targets.json`, `local-dev-ports.json`, `Deploy_FTP.info`, secrets. `*.example` and public JSON are tracked; real credentials are gitignored. |
-| `karavi/karavi.scripts.command` | Operator/agent **commands** (deploy, run all, clean, history.write, ...). Invoked as the working entry points the agent runs. |
-| `karavi/karavi.scripts.tools` | Tooling **helpers** (verify structure, path resolvers, build pieces, `verify-gates.json`, ...). Reused by scripts.command — not invoked directly by the user. |
-| `karavi/karavi.temp.logs` | **Temporary** local logs and captured run output. Gitignored. Cleared by `clean` (Section 2). |
-| `karavi/karavi.temp.status` | **Temporary** execution/deploy status reports (HTML/JSON), e.g. `Deploy_Summary.html`, `BrowserCheck.html`. Gitignored. Cleared by `clean`. |
-| `karavi/karavi.temp.deploy` | **Temporary** release output staged, ready to deploy. Gitignored. Cleared by `clean --deep`. |
-| `karavi/karavi.temp.build` | **Temporary** build output. Gitignored. Cleared by `clean --deep`. |
+| `plans`, `prompt`, `prompts`, `karavi.plans`, `karavi.prompt`, `karavi.prompts`, `plans.prompt`, `prompts.plan` | `karavi/karavi.plans.prompt` |
+| `history`, `histories`, `karavi.histories`, `change-history`, `log-history` | `karavi/karavi.history` |
+| `deploy`, `config`, `deploy.config`, `karavi.deploy`, `karavi.config`, `deploy-config` | `karavi/karavi.deploy.config` |
+| `commands`, `scripts.command`, `karavi.commands`, `karavi.scripts.command`, `scripts/command` | `karavi/karavi.scripts.command` |
+| `tools`, `scripts.tools`, `karavi.tools`, `karavi.scripts.tools`, `scripts/tools` | `karavi/karavi.scripts.tools` |
+| `scripts` (general/unsplit) | Contents moved into `karavi/karavi.scripts.command` & `karavi/karavi.scripts.tools` |
+| `logs`, `log`, `temp.logs`, `karavi.logs`, `temp/logs` | `karavi/karavi.temp.logs` |
+| `status`, `temp.status`, `karavi.status`, `temp/status` | `karavi/karavi.temp.status` |
+| `temp.deploy`, `karavi.deploy.temp`, `temp/deploy` | `karavi/karavi.temp.deploy` |
+| `build`, `temp.build`, `karavi.build`, `temp/build` | `karavi/karavi.temp.build` |
+| `assets`, `karavi.asset`, `assets/{brand,icons,...}` | `karavi/karavi.assets/{brand,icons,screenshots,templates}` |
+| `mockup`, `mockups`, `karavi.mockups`, `ui-mockups` | `karavi/karavi.mockup` |
+| `doc`, `docs`, `karavi.docs`, `documentation`, `karavi.documentation` | `karavi/karavi.doc` |
+| `BusinessModel`, `business`, `businessmodel`, `karavi.business`, `karavi.businessmodel`, `BusinessModel.Doc` | `karavi/karavi.BusinessModel.Doc` |
+| `customer`, `customers`, `karavi.customer`, `Customer`, `Customer.doc` | `karavi/karavi.Customer.doc` |
+| `social`, `socialmedia`, `karavi.social`, `karavi.socialmedia`, `SocialMediaContent` | `karavi/karavi.SociaMediaContent` |
 
-> The four `karavi.temp.*` folders are the only deletable ones. Every other core
-> folder is preserved.
+---
 
-## Optional folders (only with `--full`, and only if the project needs them)
+## AI Execution Procedure (گام‌های اجرایی هوش مصنوعی)
 
-| Folder | Purpose |
-|---|---|
-| `karavi/karavi.assets/{brand,icons,screenshots,templates}` | Static assets for docs/UI. |
-| `karavi/karavi.mockup` | Mockups / UI reference images and files. |
-| `karavi/karavi.doc` | General technical/operator documentation for this project (planning, technical & operator). |
-| `karavi/karavi.BusinessModel.Doc` | Business model and commercial documentation. |
-| `karavi/karavi.Customer.doc` | Customer / planning documentation (before execution). |
-| `karavi/karavi.SociaMediaContent` | Social-media content (optional). |
+When executing `/karavi-folder init` or `/karavi-folder create`:
 
-Create optional folders only when the project actually uses them — do not create
-every optional folder blindly.
+1. **Locate Repo Root:**
+   Find the root containing `.git` or `karavi/`.
+2. **Scan Existing `karavi/`:**
+   Inspect all child directories under `karavi/`.
+3. **Execute Migration:**
+   - For each legacy directory found, check if the canonical target exists.
+   - If the canonical target does not exist, rename/move the directory directly.
+   - If the canonical target already exists, move each item inside the legacy directory into the canonical target, preserving all files. If a filename collision occurs, rename the incoming file with a `.legacy-*` suffix rather than overwriting.
+   - Remove the empty legacy folder once emptied.
+4. **Scaffold Missing Folders (Full by default):**
+   Ensure all 18 canonical folders exist. Create any folder that is missing.
+5. **Place Sentinel `.gitkeep`:**
+   Add `.gitkeep` inside empty tracking/temp folders so git tracks directory structure.
+6. **Wire `.gitignore`:**
+   Ensure the `# --- karavi ---` block is present in the repo's `.gitignore`.
+7. **Report:**
+   Output a summary of migrated folders and newly created paths.
 
-## Recurring usage (دستور بکارگیری همیشگی)
+---
 
-The karavi tree must exist in **every** repository the operator touches. Make
-this a standing habit:
+## `.gitignore` Specification
 
-1. On repo (re)initialization, when `karavi/` is missing or incomplete, run:
+Every karavi workspace must have this block in the root `.gitignore`:
 
-   ```
-   /karavi-folder create --full
-   ```
-
-   Persian: `/karavi-folder ساخت --کامل`.
-
-2. Direct script (from the repo root, if the skill's script is copied into the
-   repo under `karavi/karavi.scripts.command/`):
-
-   ```powershell
-   & "karavi/karavi.scripts.command/karavi-folder.create.ps1" -Full
-   ```
-
-   Or on a specific target:
-
-   ```powershell
-   & "karavi/karavi.scripts.command/karavi-folder.create.ps1" -RepoRoot D:\path\to\repo
-   ```
-
-3. The command is **idempotent**: it creates only missing folders and never
-   deletes or overwrites. Run it any time the structure is doubtful.
-
-> Reference this skill in each repo's operating rules (e.g. a `karavi`
-> README or `.cursor/rules`) so every agent re-creates the structure on demand.
-
-## `.gitkeep` convention
-
-Add a `.gitkeep` inside output/temp folders (`karavi.temp.*/`,
-`karavi.history/`, `karavi.assets/**`) so empty directories are tracked, and
-drop `.gitkeep` once real content exists.
-
-## `.gitignore` wiring
-
-Append a `# --- karavi ---` block to the repo's `.gitignore`:
-
-```
+```gitignore
+# --- karavi ---
 karavi/karavi.temp.logs/
 karavi/karavi.temp.status/
 karavi/karavi.temp.deploy/
@@ -100,33 +107,13 @@ karavi/karavi.deploy.config/Deploy_TestUsers.info
 karavi/karavi.deploy.config/deploy.secrets.json
 ```
 
-Never commit local-only config overlays (`Deploy_FTP.info`,
-`appsettings.Development.json`, `appsettings.Local.json`).
+---
 
-**Security / git-clean:** never commit secrets or local-only config. The
-`karavi.temp.*` folders stay gitignored, and before commit/done `git status`
-must show no generated or temporary files under `karavi/`.
+## Verification Checklist
 
-## Per-project config to wire after creation
-
-| Config | Where |
-|---|---|
-| Hosts, URLs, ports | `karavi.deploy.config/production-hosts.json`, `deploy-targets.json`, `local-dev-ports.json` |
-| Agent rule paths | `karavi.scripts.tools/workspace.paths.ps1`, `.cursor/rules/` |
-| Verify gates | `karavi.scripts.tools/verify-gates.json` |
-
-## Verification
-
-- Confirm each expected folder exists (`Test-Path`), no folder on the list is
-  missing.
-- Confirm `.gitignore` got the `# --- karavi ---` block.
-- Confirm no path points outside the repo root.
-- If `karavi.scripts.tools/verify.karavi-structure.ps1` exists in the repo, run it.
-
-## Exit codes
-
-| Code | Meaning |
-|---|---|
-| 0 | Tree created / verified. |
-| 1 | Repo root not found, or a required path could not be created. |
-| 3 | A requested path resolves outside the repo root. |
+After running `init` or `create`:
+- [ ] All 18 canonical folders exist under `karavi/`.
+- [ ] No old/legacy unmapped folders remain in `karavi/`.
+- [ ] Existing history, documentation, prompts, and configs have been migrated intact.
+- [ ] `.gitignore` contains the `# --- karavi ---` block.
+- [ ] `git status` is clean of temporary/generated files under `karavi/`.

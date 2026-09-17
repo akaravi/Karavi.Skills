@@ -1,47 +1,64 @@
 # karavi-folder
 
-Pipeline / caretaker skill that maintains the standard **`karavi/` workspace**
-in a repository. It has two sections:
+Pipeline / caretaker skill that initializes, migrates, and maintains the standard
+**`karavi/` workspace** in a repository.
 
-1. **Create main folders** — scaffold the canonical `karavi/` tree.
-2. **Delete temporary info** — remove the four `karavi.temp.*` folders (logs,
-   status, build, deploy output) plus caches.
+It performs two primary operations:
+
+1. **Initialize & Create main folders** (`init` / `create`) — Scaffold the canonical
+   `karavi/` tree (**Full by default: 18 folders**) and automatically **detect, rename,
+   and migrate** any existing or legacy folders inside `karavi/` to the new standard.
+2. **Delete temporary info** (`clean`) — Remove temporary logs, status reports, build/deploy
+   output, and stack caches while strictly preserving source, history, and configs.
 
 > **This is a pipeline skill, not a reference skill.** Invoke it as
-> `/karavi-folder` when you want the assistant to create or tidy the `karavi/`
+> `/karavi-folder init` when you want the assistant to initialize or migrate the `karavi/`
 > folder in the *current* repository.
 
-## Folders it creates
+---
 
-### Core — `/karavi-folder create` (9 folders)
+## Canonical Folders (Full Structure by Default — 18 Folders)
 
 | Folder | Purpose |
 |---|---|
 | `karavi.plans.prompt` | Prompts, rules, and plans for all agents |
-| `karavi.history` | Change history (`history.YYYY-MM-DD.md`) |
-| `karavi.deploy.config` | Deploy & FTP config for this repo |
-| `karavi.scripts.command` | Operator commands (deploy, run all, clean, ...) |
-| `karavi.scripts.tools` | Tooling helpers (verify, paths, ...) |
-| `karavi.temp.logs` | Temporary logs (gitignored) |
+| `karavi.history` | Daily change history (`history.YYYY-MM-DD.md`) |
+| `karavi.deploy.config` | Deploy & FTP configuration for this repository |
+| `karavi.scripts.command` | Operator/agent commands (deploy, run all, clean, ...) |
+| `karavi.scripts.tools` | Tooling helpers (verify gates, paths, ...) |
+| `karavi.temp.logs` | Temporary local logs (gitignored) |
 | `karavi.temp.status` | Temporary status reports (gitignored) |
-| `karavi.temp.deploy` | Temporary staged release output (gitignored) |
+| `karavi.temp.deploy` | Temporary release staging output (gitignored) |
 | `karavi.temp.build` | Temporary build output (gitignored) |
+| `karavi.assets/{brand,icons,screenshots,templates}` | Brand assets, icons, screenshots, and templates |
+| `karavi.mockup` | Mockups and design reference files |
+| `karavi.doc` | Technical, architectural, and operator docs |
+| `karavi.BusinessModel.Doc` | Business model and commercial documentation |
+| `karavi.Customer.doc` | Customer feedback and pre-execution planning |
+| `karavi.SociaMediaContent` | Social media content and media assets |
 
-### Optional — `/karavi-folder create --full` (adds 8)
+---
 
-`karavi.assets/{brand,icons,screenshots,templates}` · `karavi.mockup` ·
-`karavi.doc` · `karavi.BusinessModel.Doc` · `karavi.Customer.doc` ·
-`karavi.SociaMediaContent`
+## Legacy Folder Migration
 
-## Always-use command (دستور بکارگیری همیشگی)
+When running `init` or `create`, any existing folders inside `karavi/` with legacy or variant names
+(e.g., `docs`, `prompts`, `history`, `deploy`, `scripts/command`, `logs`, `status`, `build`, `assets`,
+`mockup`, `business`, `customer`, `social`) are **automatically detected, renamed, and relocated**
+into the new standard structure without deleting or losing any content.
 
-Keep the karavi structure in **every** repo. Standing command:
+---
 
+## Always-Use Habit
+
+Initialize or update the karavi structure in **every** repository:
+
+```bash
+/karavi-folder init
 ```
-/karavi-folder create --full
-```
 
-Persian: `/karavi-folder ساخت --کامل`. Idempotent and never destructive.
+Persian: `/karavi-folder شروع` یا `/karavi-folder ایجاد و بازسازی`. Idempotent, safe, and repairs existing legacy structures.
+
+---
 
 ## Installation
 
@@ -49,37 +66,49 @@ Persian: `/karavi-folder ساخت --کامل`. Idempotent and never destructive.
 npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
 ```
 
+---
+
 ## Invocation
 
 | Command | What it runs |
 |---|---|
-| `/karavi-folder create` | Create core skeleton (9 folders) |
-| `/karavi-folder create --full` | Create core + optional folders |
+| `/karavi-folder init` | Full initialization (18 folders) + migrate legacy folders (Default) |
+| `/karavi-folder init --core` | Core initialization (9 folders) + migrate legacy folders |
+| `/karavi-folder create` | Full structure creation & migration (Default) |
 | `/karavi-folder clean` | Clear temp.logs + temp.status |
-| `/karavi-folder clean --deep` | Also clear temp.deploy + temp.build + caches |
+| `/karavi-folder clean --deep` | Also clear temp.deploy + temp.build + stack caches |
 | `/karavi-folder clean --what-if` | Dry-run preview, deletes nothing |
+
+---
 
 ## When to Use
 
-- "ایجاد فولدرهای اصلی karavi را بساز" → create the skeleton
-- "پاک کن اطلاعات موقت / لاگ‌ها / کش karavi" → clean
-- "Create the karavi folder structure"
-- "Clean the karavi logs and caches"
+- "شروع اولیه ساختار karavi" / "مقداردهی اولیه karavi" → `init`
+- "تغییر نام و انتقال فولدرهای قدیمی karavi به ساختار جدید" → `init`
+- "ایجاد فولدرهای اصلی karavi" → `init` / `create`
+- "پاک کن اطلاعات موقت / لاگ‌ها / کش karavi" → `clean`
+- "Initialize standard karavi workspace" → `init`
+- "Migrate legacy karavi folders to new standard" → `init`
+
+---
 
 ## Safety
 
 This skill **never deletes** source, config without secrets, `karavi.history/`,
-`karavi.deploy.config/`, or README files. Only the four `karavi.temp.*` folders
-are deletable. It is idempotent and always previewed (`--what-if`) before a
-destructive pass unless the user explicitly approved.
+`karavi.deploy.config/`, documentation, or README files. Only the four `karavi.temp.*` folders
+and caches are deletable. It is idempotent and supports dry-run preview (`--what-if`).
+
+---
 
 ## Reference
 
 - [`HELP.md`](./HELP.md) — complete user guide (Persian/English, FAQ, troubleshooting)
-- [`SKILL.md`](./SKILL.md) — entry point / decision core
-- [`references/folders.md`](./references/folders.md) — Section 1 mechanics
+- [`SKILL.md`](./SKILL.md) — entry point / decision core & AI directives
+- [`references/folders.md`](./references/folders.md) — Section 1 mechanics & migration map
 - [`references/cleanup.md`](./references/cleanup.md) — Section 2 mechanics
-- [`scripts/`](./scripts/) — optional PowerShell helpers
+- [`scripts/`](./scripts/) — PowerShell automation helpers (`init.ps1`, `create.ps1`, `clean.ps1`)
+
+---
 
 ## License
 

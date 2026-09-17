@@ -7,11 +7,11 @@ they install with `npx skills add`, so treat every file here as a public API.
 
 | Skill | Category | Does |
 |---|---|---|
-| [`karavi-folder`](./karavi-folder/) | Pipeline / caretaker | Scaffolds the standard `karavi/` workspace tree (Section 1) and safely removes temporary data — the four `karavi.temp.*` folders and caches (Section 2). |
+| [`karavi-folder`](./karavi-folder/) | Pipeline / caretaker | Initializes & scaffolds the standard `karavi/` workspace tree (Full structure by default: 18 folders), migrates and renames legacy folder trees (Section 1), and safely removes temporary data — the four `karavi.temp.*` folders and caches (Section 2). |
 
 ## Choosing a Skill
 
-- **Need the `karavi/` skeleton created in a repo?** → `/karavi-folder create`
+- **Need the `karavi/` skeleton initialized, migrated, or created?** → `/karavi-folder init` (or `/karavi-folder create`, Full by default)
 - **Need to clear temp logs / caches / build artifacts?** → `/karavi-folder clean`
   (add `--deep` for full artifact+cache cleanup)
 
