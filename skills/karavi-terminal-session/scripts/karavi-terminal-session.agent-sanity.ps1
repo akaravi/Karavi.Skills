@@ -1,4 +1,4 @@
-# karavi-powershell-session.agent-sanity.ps1
+# karavi-terminal-session.agent-sanity.ps1
 # Read-only local session report for agent Shell (no remote).
 $ErrorActionPreference = 'Continue'
 $shell = (Get-Process -Id $PID).Path
