@@ -1,6 +1,6 @@
 # Karavi project integration
 
-`karavi-terminal-session` owns the shell/session boundary: opening a terminal,
+`karavi-terminal` owns the shell/session boundary: opening a terminal,
 interactive login, command risk, output capture, and verification. It does not replace
 domain-specific skills.
 

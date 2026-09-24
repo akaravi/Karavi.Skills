@@ -1,12 +1,12 @@
 ---
-name: karavi-terminal-session
+name: karavi-terminal
 description: >
   Supervised Windows terminal sessions for agents: PowerShell, Windows Terminal,
   SSH, WSL, remote shells, Orca terminals, and visible Windows app control; let the
   user log in interactively, run read-only diagnostics without approval, require
   explicit approval before mutation, capture stdout/stderr/exit codes, and handle
   prompts safely without secrets in chat. TRIGGER when: user says
-  "/karavi-terminal-session", "جلسه ترمینال", "ترمینال PowerShell نظارت‌شده",
+  "/karavi-terminal", "جلسه ترمینال", "ترمینال PowerShell نظارت‌شده",
   "Windows Terminal", "supervised terminal", "SSH login then agent", "readonly vs
   mutation terminal", "interactive terminal session", "Orca terminal", "Computer
   Use for Windows", or wants agent-driven shell work with permission gates on staging
@@ -22,7 +22,7 @@ metadata:
   compatibility: "Cross-tool (Cursor, Claude Code, Codex). Windows-first, with Linux/VoIP remote-shell support. Agent shell is not the user's interactive PID unless documented."
 ---
 
-# karavi-terminal-session
+# karavi-terminal
 
 Operate a **supervised terminal session** with a strict **read-only vs mutation**
 permission model. PowerShell is the default Windows shell, but the same lifecycle
@@ -30,6 +30,15 @@ applies to Windows Terminal profiles, `cmd.exe`, WSL, SSH/Linux shells, and Orca
 managed terminals. The user performs **interactive login** (SSH, RDP console, cloud
 console, or a visible terminal tab); the agent runs commands in its **own** shell
 tool session unless the user explicitly pastes into the shared terminal.
+
+## Agent-controlled local session
+
+For commands an agent must send and read itself, use `open-agent-session` to obtain
+`sessionId` and PID, `invoke-agent-command` to run one bounded command in the same
+process, `get-agent-session` to list verified-live sessions, and `close-agent-session`
+to close one owned session. The local runtime registry is
+`karavi.temp.status/karavi-terminal-sessions.json`; every operation reconciles stale
+records using PID plus process start time. A PID alone is never a control channel.
 
 ## Quick start
 
@@ -70,14 +79,18 @@ Session status → last command class → result + exit code → evidence → ne
 
 | Script | Purpose |
 |--------|---------|
-| `scripts/karavi-terminal-session.open-interactive.ps1` | Open user PowerShell + optional SSH; write `.cursor/<alias>-terminal-session.json` |
-| `scripts/karavi-terminal-session.agent-sanity.ps1` | Read-only report for agent shell (`SHELL`, `PS_VERSION`, `CWD`, `ENCODING`) |
-| `scripts/verify-terminal-skill.ps1` | Read-only structural and encoding verification |
+| `scripts/karavi-terminal.open-interactive.ps1` | Open user PowerShell + optional SSH; write `.cursor/<alias>-terminal-session.json` |
+| `scripts/karavi-terminal.open-agent-session.ps1` | Open a persistent local PowerShell session and return `sessionId` + PID JSON |
+| `scripts/karavi-terminal.invoke-agent-command.ps1` | Execute one bounded command in an owned session and return JSON evidence |
+| `scripts/karavi-terminal.get-agent-session.ps1` | List verified-live sessions from `karavi.temp.status` |
+| `scripts/karavi-terminal.close-agent-session.ps1` | Close one owned session and remove its registry record |
+| `scripts/karavi-terminal.agent-sanity.ps1` | Read-only report for agent shell (`SHELL`, `PS_VERSION`, `CWD`, `ENCODING`) |
+| `scripts/verify-karavi-terminal-skill.ps1` | Read-only structural and encoding verification |
 
 **Interactive SSH (parameters supplied by user or repo-local wrapper, not hard-coded in skill):**
 
 ```powershell
-& .agents/skills/karavi-terminal-session/scripts/karavi-terminal-session.open-interactive.ps1 `
+& .agents/skills/karavi-terminal/scripts/karavi-terminal.open-interactive.ps1 `
   -RepoRoot (Get-Location) `
   -HostAlias <short-name> `
   -RemoteHost <hostname-or-ip> `
@@ -115,4 +128,4 @@ Repo-specific shortcuts (hosts, ports, users) belong in **that repository** unde
 
 ## Starter
 
-`/karavi-terminal-session` then wait for user `ready`.
+`/karavi-terminal` then wait for user `ready`.

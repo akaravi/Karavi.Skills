@@ -1,0 +1,2 @@
+param([Parameter(Mandatory)][string]$SessionId,[Parameter(Mandatory)][string]$Command,[string]$RepoRoot=(Get-Location).Path,[int]$TimeoutSeconds=30)
+$ErrorActionPreference='Stop'; Import-Module (Join-Path $PSScriptRoot 'karavi-terminal.agent-session.psm1') -Force; Invoke-KaraviTerminalCommand -RepoRoot $RepoRoot -SessionId $SessionId -Command $Command -TimeoutSeconds $TimeoutSeconds | ConvertTo-Json -Compress

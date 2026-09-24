@@ -9,13 +9,13 @@ so treat every file here as a public API.
 
 | Skill | Does |
 |---|---|
+| `karavi-terminal/` | Supervised Windows terminal sessions: user interactive login, agent read-only without approval, mutation only after explicit approval, terminal monitoring, and safe prompts/secrets. |
 | `karavi-asterisk-voip/` | Guides Asterisk, FreePBX, SIP/PJSIP, RTP, AMI, ARI, AGI, dialplan, IVR, queues, CDR/CEL, testing, security, and troubleshooting work. |
 
 **Pipeline / caretaker skills** run on demand and have side effects:
 
 | Skill | Does |
 |---|---|
-| `karavi-terminal-session/` | Supervised Windows terminal sessions: user interactive login, agent read-only without approval, mutation only after explicit approval, terminal monitoring, and safe prompts/secrets. |
 | `karavi-folder/` | Initializes and scaffolds the standard `karavi/` workspace tree (Full structure by default: 18 folders), migrates/renames legacy folders, and removes temporary data (the `karavi.temp.*` folders and caches). Two sections: init/create main folders, then delete temp info. |
 
 ## File layout

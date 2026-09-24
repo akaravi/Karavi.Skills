@@ -7,7 +7,7 @@ scope.
 ```powershell
 npx skills find powershell
 npx skills find windows-terminal
-npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-terminal-session
+npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-terminal
 npx skills update
 ```
 

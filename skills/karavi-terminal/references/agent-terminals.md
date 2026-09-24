@@ -11,8 +11,8 @@ Never store secrets in JSON. `<alias>` is a short label the user or repo chooses
 
 ## Workflow
 
-1. Agent runs `karavi-terminal-session.agent-sanity.ps1` (read-only).
-2. User or approved mutation runs `karavi-terminal-session.open-interactive.ps1` with **user-supplied** host/port/user, or a **repo-local** wrapper script.
+1. Agent runs `karavi-terminal.agent-sanity.ps1` (read-only).
+2. User or approved mutation runs `karavi-terminal.open-interactive.ps1` with **user-supplied** host/port/user, or a **repo-local** wrapper script.
 3. User types `ready` after interactive login succeeds.
 4. Agent runs read-only on agent Shell (e.g. SSH with keys) or asks user to paste from the user tab.
 

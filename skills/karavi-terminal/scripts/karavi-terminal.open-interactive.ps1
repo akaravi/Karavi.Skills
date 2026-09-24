@@ -1,4 +1,4 @@
-# karavi-terminal-session.open-interactive.ps1
+# karavi-terminal.open-interactive.ps1
 # Opens a visible PowerShell window for interactive SSH/login; writes session JSON.
 # Exit: 0 ok, 1 bad args, 2 Start-Process failed
 [CmdletBinding()]
@@ -27,7 +27,7 @@ if ($SshExtraArgs) { $sshLine = "$sshLine $SshExtraArgs" }
 
 $inner = @"
 Set-Location '$RepoRoot'
-Write-Host '=== karavi-terminal-session: interactive login ===' -ForegroundColor Cyan
+Write-Host '=== karavi-terminal: interactive login ===' -ForegroundColor Cyan
 Write-Host ('PowerShell PID: ' + `$PID) -ForegroundColor Yellow
 Write-Host 'Agent uses Shell tool separately; type password/MFA here only.' -ForegroundColor DarkGray
 $sshLine
@@ -50,7 +50,7 @@ $meta = @{
     user          = $User
     openedAt      = (Get-Date -Format 'o')
     note          = 'Interactive login only. Agent cannot type into this PID; use agent Shell or paste approved commands.'
-    skill         = 'karavi-terminal-session'
+    skill         = 'karavi-terminal'
 }
 $meta | ConvertTo-Json | Set-Content -Path $metaPath -Encoding UTF8
 Write-Host "Opened PowerShell PID=$($p.Id); metadata: $metaPath"

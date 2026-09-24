@@ -24,7 +24,7 @@ operations. Use GUI control only for visible state that those interfaces cannot 
 
 ## Routing
 
-Use `karavi-terminal-session` for lifecycle, command classification, and evidence.
+Use `karavi-terminal` for lifecycle, command classification, and evidence.
 Use `computer-use` or `computer-use:computer-use` for the actual visible app action,
 following that skill's current API and confirmation rules. The terminal session remains
 the source of truth for command output and exit codes.
