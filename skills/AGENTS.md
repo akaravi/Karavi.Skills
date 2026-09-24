@@ -7,6 +7,10 @@ so treat every file here as a public API.
 
 **Reference skills** carry knowledge and are always available.
 
+| Skill | Does |
+|---|---|
+| `karavi-asterisk-voip/` | Guides Asterisk, FreePBX, SIP/PJSIP, RTP, AMI, ARI, AGI, dialplan, IVR, queues, CDR/CEL, testing, security, and troubleshooting work. |
+
 **Pipeline / caretaker skills** run on demand and have side effects:
 
 | Skill | Does |

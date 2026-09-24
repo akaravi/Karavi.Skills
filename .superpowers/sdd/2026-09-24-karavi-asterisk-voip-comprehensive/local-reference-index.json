@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "1.0",
+  "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+  "files": [
+    {
+      "path": "agi-fastagi.md",
+      "title": "AGI and FastAGI",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "5d34842c94cfbbe7e939b176318e20c65deb6d4c7d61481ea43a81ed572c91af"
+    },
+    {
+      "path": "ami.md",
+      "title": "Asterisk Manager Interface (AMI)",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "53d4d0826dee7e3c63c342dbd773197f2f397f2c754ff1a8c9034fc9e2fdf2c0"
+    },
+    {
+      "path": "ari-agi.md",
+      "title": "ARI, AGI, FastAGI, and media applications",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "fb4ba1c793f280772a6adbf67a7ecb81650e3e6eb177ba9090703362b3531962"
+    },
+    {
+      "path": "ari.md",
+      "title": "Asterisk REST Interface (ARI)",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "68f35439ef0e6c7c74f61819c3195f7b3e32b7378e51e76f2e3b3dad18954429"
+    },
+    {
+      "path": "build-deployment-operation.md",
+      "title": "Build, deployment, and operation",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "1496a42123feff933d2b9719ad8a8d0cfed1eb9c67b1113c46b7935e7d7db56f"
+    },
+    {
+      "path": "cdr-cel-realtime.md",
+      "title": "CDR, CEL, realtime, and operational data",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "942341bb00b6b8e86f97eb5c9dbf45e4c2339e1e94788c617c34f31c5eca4366"
+    },
+    {
+      "path": "configuration-model.md",
+      "title": "Configuration model",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "c1187dda07928a25eee5fb800a78478cc4827529af502afa50de8bed07dca602"
+    },
+    {
+      "path": "coverage-matrix.md",
+      "title": "Official Asterisk Documentation Coverage Matrix",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "9bfac52a9a320c63ed971206ae4bb9930e351c6d330c29da653f761a2d87ded2"
+    },
+    {
+      "path": "development-modules.md",
+      "title": "Development, modules, and extension points",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "03b432f49f27929eb508f604c4b22f506a12855b4f3cfee2b27f054ec39c67e5"
+    },
+    {
+      "path": "dialplan-ivr.md",
+      "title": "Dialplan, IVR, queues, and call flows",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "582c26e3443ed90b4550575d1f23f3d41640a96a37cd8fc73b67719c4b4bcd1d"
+    },
+    {
+      "path": "fundamentals.md",
+      "title": "Asterisk fundamentals",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "af44dbfb20d12b7b8eb1888faa56794e07ee534cec2e9a69b8f0d1585c5873be"
+    },
+    {
+      "path": "pjsip-sip.md",
+      "title": "SIP, PJSIP, RTP, and media",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "bd745e8b5ab3fc3dd92fd2936651b41b253657e2a5f25a0486affe6dab4040b6"
+    },
+    {
+      "path": "queues-voicemail-conferencing.md",
+      "title": "Queues, voicemail, parking, and conferencing",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "e25b2be1afb8e8f7356bc169c91446334888c8bd3821b3bb331afa6928e35088"
+    },
+    {
+      "path": "rtp-media-codecs.md",
+      "title": "RTP, media, codecs, and external media",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "84180ace0a3628fb098ee555ebab83453e07bf34c28a4f81641dc983c250d0e3"
+    },
+    {
+      "path": "security-hardening.md",
+      "title": "Security hardening",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "369a468ea0d25c40c275b590f89bb6a0f9480cf7bc4b39ee0bf35ad07b3dd14f"
+    },
+    {
+      "path": "testing-asterisk-test-suite.md",
+      "title": "Asterisk Test Suite and implementation verification",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "9ab0218f469129a1f9e9ca897aafbbced82e96b1b1e04424634adfca5613b9ff"
+    },
+    {
+      "path": "testing-troubleshooting.md",
+      "title": "Testing, observability, and troubleshooting",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "a6be47aae2ee03e8d44b4486a62165b86c92aa3e37b7f4e55e43f3308f91c935"
+    },
+    {
+      "path": "troubleshooting-observability.md",
+      "title": "Troubleshooting and observability",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "baac6ca2693b2db1d6750be32f892eb60b9829f7b19d4df4f130c22ea722917a"
+    },
+    {
+      "path": "version-compatibility.md",
+      "title": "Version compatibility",
+      "domain": "root",
+      "sourceRoot": "D:\\SourceKaravi\\GitHub\\Karavi.Skills\\skills\\karavi-asterisk-voip\\references",
+      "sha256": "63375651ec566aa1b9616a70c92cc34d02eed66e4f2f70102d9125f835e423e2"
+    }
+  ]
+}

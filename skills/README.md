@@ -8,6 +8,7 @@ they install with `npx skills add`, so treat every file here as a public API.
 | Skill | Category | Does |
 |---|---|---|
 | [`karavi-folder`](./karavi-folder/) | Pipeline / caretaker | Initializes & scaffolds the standard `karavi/` workspace tree (Full structure by default: 18 folders), migrates and renames legacy folder trees (Section 1), and safely removes temporary data — the four `karavi.temp.*` folders and caches (Section 2). |
+| [`karavi-asterisk-voip`](./karavi-asterisk-voip/) | VoIP / telephony reference | Guides development and troubleshooting for Asterisk, FreePBX, SIP/PJSIP, RTP, AMI, ARI, AGI, dialplan, IVR, queues, and CDR/CEL with security, reliability, observability, and testing boundaries. |
 
 ## Choosing a Skill
 
