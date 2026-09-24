@@ -14,7 +14,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: akaravi
-  version: "0.1.0"
+  version: "0.2.0"
   category: operator-session
   tags: "karavi, powershell, pwsh, terminal, ssh, readonly, mutation, approval, monitoring, cursor"
 compatibility: Cross-tool (Cursor, Claude Code, Codex). Windows-first. Agent shell is not the user's interactive PID unless documented.
@@ -67,6 +67,34 @@ Session status → last command class → result + exit code → evidence → ne
 - [command-classification.md](references/command-classification.md)
 - [permission-model.md](references/permission-model.md)
 - [agent-terminals.md](references/agent-terminals.md)
+
+
+## Repo helpers (this skill)
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/karavi-powershell-session.open-interactive.ps1` | Open user PowerShell + SSH; write `.cursor/<alias>-terminal-session.json` |
+| `scripts/karavi-powershell-session.agent-sanity.ps1` | Read-only report for agent Shell (`SHELL`, `PS_VERSION`, `CWD`, `ENCODING`) |
+
+### s91 (NTK.Asterisk.Assistant)
+
+From repo root:
+
+```powershell
+& skills/karavi-powershell-session/scripts/karavi-powershell-session.open-interactive.ps1 `
+  -RepoRoot . -HostAlias s91 -RemoteHost s91.voip.ntk.ir -Port 8522 -User karavi
+```
+
+Or project shortcut: `scripts/open-s91-powershell.ps1`
+
+## Acceptance checklist
+
+- [ ] Agent reported shell/cwd/version/encoding
+- [ ] User logged in interactively; agent did not handle passwords
+- [ ] Read-only ran without approval; mutations blocked without block
+- [ ] Exit codes and masked evidence each turn
+- [ ] Channel documented (user tab vs agent Shell)
+
 
 ## Starter
 
