@@ -16,7 +16,7 @@ description: >
 license: Apache-2.0
 metadata:
   author: akaravi
-  version: "0.3.0"
+  version: "0.4.0"
   category: operator-session
   tags: "karavi, terminal, powershell, pwsh, windows-terminal, ssh, wsl, orca, computer-use, readonly, mutation, approval, monitoring"
   compatibility: "Cross-tool (Cursor, Claude Code, Codex). Windows-first, with Linux/VoIP remote-shell support. Agent shell is not the user's interactive PID unless documented."
@@ -39,6 +39,16 @@ process, `get-agent-session` to list verified-live sessions, and `close-agent-se
 to close one owned session. The local runtime registry is
 `karavi.temp.status/karavi-terminal-sessions.json`; every operation reconciles stale
 records using PID plus process start time. A PID alone is never a control channel.
+
+## ConPTY session
+
+For an interactive terminal an agent can launch, read as ASCII, and type into, use
+the PTY scripts in [pty-sessions.md](references/pty-sessions.md). A hidden host owns
+Windows ConPTY sessions for one repo root. `pty-launch` and `pty-send-keys` start
+processes and inject input, so they are mutation. `pty-screenshot`, `pty-wait`, and
+`pty-list` are read-only. `pty-close` and `pty-close-host` terminate owned processes.
+Working directories must stay inside the repo root. Returned screens are bounded and
+redacted.
 
 ## Quick start
 
@@ -85,6 +95,14 @@ Session status → last command class → result + exit code → evidence → ne
 | `scripts/karavi-terminal.get-agent-session.ps1` | List verified-live sessions from `karavi.temp.status` |
 | `scripts/karavi-terminal.close-agent-session.ps1` | Close one owned session and remove its registry record |
 | `scripts/karavi-terminal.agent-sanity.ps1` | Read-only report for agent shell (`SHELL`, `PS_VERSION`, `CWD`, `ENCODING`) |
+| `scripts/karavi-terminal.pty-launch.ps1` | Start a ConPTY process and return `sessionId`, PID, and the screen |
+| `scripts/karavi-terminal.pty-screenshot.ps1` | Return the current redacted ASCII screen |
+| `scripts/karavi-terminal.pty-send-keys.ps1` | Write keys (`\r` Enter, `\t` Tab, `\x1b` Escape) and return the screen |
+| `scripts/karavi-terminal.pty-wait.ps1` | Wait until output is stable, then return the screen |
+| `scripts/karavi-terminal.pty-resize.ps1` | Resize the ConPTY |
+| `scripts/karavi-terminal.pty-close.ps1` | Close one owned ConPTY session |
+| `scripts/karavi-terminal.pty-list.ps1` | List sessions owned by the repo host |
+| `scripts/karavi-terminal.pty-close-host.ps1` | Close every session and stop the host |
 | `scripts/verify-karavi-terminal-skill.ps1` | Read-only structural and encoding verification |
 
 **Interactive SSH (parameters supplied by user or repo-local wrapper, not hard-coded in skill):**
@@ -115,6 +133,7 @@ Repo-specific shortcuts (hosts, ports, users) belong in **that repository** unde
 - [command-classification.md](references/command-classification.md)
 - [permission-model.md](references/permission-model.md)
 - [agent-terminals.md](references/agent-terminals.md)
+- [pty-sessions.md](references/pty-sessions.md)
 - [powershell-core.md](references/powershell-core.md)
 - [windows-terminal.md](references/windows-terminal.md)
 - [computer-use-bridge.md](references/computer-use-bridge.md)

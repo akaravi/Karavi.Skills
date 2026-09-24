@@ -27,11 +27,19 @@ $required = @(
     'references/orca-terminal.md', 'references/session-lifecycle.md',
     'references/verification-and-capture.md', 'references/windows-devops.md',
     'references/karavi-integration.md', 'references/discovery-and-install.md',
-    'references/examples.md', 'scripts/karavi-terminal.agent-sanity.ps1',
+    'references/examples.md', 'references/pty-sessions.md',
+    'scripts/karavi-terminal.agent-sanity.ps1',
     'scripts/karavi-terminal.open-interactive.ps1', 'scripts/karavi-terminal.agent-session.psm1',
     'scripts/karavi-terminal.open-agent-session.ps1', 'scripts/karavi-terminal.invoke-agent-command.ps1',
     'scripts/karavi-terminal.get-agent-session.ps1', 'scripts/karavi-terminal.close-agent-session.ps1',
-    'scripts/verify-karavi-terminal-skill.ps1', 'tests/karavi-terminal.agent-session.Tests.ps1'
+    'scripts/karavi-terminal.pty-host.ps1', 'scripts/karavi-terminal.pty.psm1',
+    'scripts/KaraviPtySession.cs', 'scripts/karavi-terminal.pty-launch.ps1',
+    'scripts/karavi-terminal.pty-screenshot.ps1', 'scripts/karavi-terminal.pty-send-keys.ps1',
+    'scripts/karavi-terminal.pty-wait.ps1', 'scripts/karavi-terminal.pty-resize.ps1',
+    'scripts/karavi-terminal.pty-close.ps1', 'scripts/karavi-terminal.pty-list.ps1',
+    'scripts/karavi-terminal.pty-close-host.ps1',
+    'scripts/verify-karavi-terminal-skill.ps1', 'tests/karavi-terminal.agent-session.Tests.ps1',
+    'tests/karavi-terminal.pty.Tests.ps1'
 )
 $required | ForEach-Object { Require-File $_ }
 
@@ -41,8 +49,9 @@ if ($skillText -notmatch '(?m)^description:\s*>') { $failures.Add('SKILL.md desc
 if ($skillText -notmatch 'Use when|TRIGGER when') { $failures.Add('SKILL.md trigger guidance is missing') }
 if ($skillText.Contains($legacyName)) { $failures.Add('Legacy skill name remains in SKILL.md') }
 if ($skillText -notmatch 'open-agent-session') { $failures.Add('SKILL.md does not document the agent session controller') }
+if ($skillText -notmatch 'pty-launch') { $failures.Add('SKILL.md does not document the ConPTY controller') }
 
-$allTextFiles = Get-ChildItem -LiteralPath $SkillRoot -Recurse -File -Include *.md,*.ps1
+$allTextFiles = Get-ChildItem -LiteralPath $SkillRoot -Recurse -File -Include *.md,*.ps1,*.psm1,*.cs
 foreach ($file in $allTextFiles) {
     $bytes = [System.IO.File]::ReadAllBytes($file.FullName)
     if ($bytes.Length -ge 3 -and $bytes[0] -eq 0xEF -and $bytes[1] -eq 0xBB -and $bytes[2] -eq 0xBF) {

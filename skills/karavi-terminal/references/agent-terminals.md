@@ -4,6 +4,10 @@
 |---------|-----------|------------------|
 | User PowerShell (`powershellPid` in JSON) | User | User pastes output unless integrated terminal capture exists |
 | Agent Shell tool | Agent | stdout/stderr/exit via tool |
+| ConPTY host | Agent | ASCII screen via `pty-screenshot` / `pty-send-keys` |
+
+The ConPTY channel is documented in [pty-sessions.md](pty-sessions.md). It is a real
+pseudoconsole, separate from the command-marker session.
 
 Session file: `.cursor/<alias>-terminal-session.json` — fields: `host`, `port`, `user`, `powershellPid`, `openedAt`, `note`, `skill`.
 

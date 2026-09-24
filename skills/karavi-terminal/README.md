@@ -16,6 +16,8 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-terminal
 
 در چت agent: `/karavi-terminal`
 
+برای ترمینال تعاملی (صفحهٔ ASCII، ارسال کلید، انتظار، تغییر اندازه) اسکریپت‌های `pty-*` را ببینید: [references/pty-sessions.md](references/pty-sessions.md).
+
 باز کردن SSH تعاملی (پارامترها را خودتان یا wrapper محلی پر کنید):
 
 ```powershell
