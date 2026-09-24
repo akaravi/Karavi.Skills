@@ -17,13 +17,13 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
 ## مهارت‌ها
 
 | مهارت | دسته | کارکرد |
-| [`karavi-powershell-session`](./skills/karavi-powershell-session/) | Operator session | جلسه PowerShell نظارت‌شده: login کاربر، read-only خودکار، mutation با تأیید. |
+| [`karavi-terminal-session`](./skills/karavi-terminal-session/) | Operator session | جلسهٔ ترمینال Windows نظارت‌شده: PowerShell، Windows Terminal، SSH، WSL، read-only خودکار و mutation با تأیید. |
 | [`karavi-folder`](./skills/karavi-folder/) | Pipeline / caretaker | اسکلت استاندارد `karavi/` را به‌صورت کامل (پیش‌فرض Full: ۱۸ فولدر) می‌سازد، فولدرهای قبلی/قدیمی را تغییر نام و مهاجرت می‌دهد (بخش ۱)، و اطلاعات موقت (`karavi.temp.*`) و کش را به‌شکل امن پاک می‌کند (بخش ۲). |
 | [`karavi-asterisk-voip`](./skills/karavi-asterisk-voip/) | VoIP / telephony reference | راهنمای توسعه و عیب‌یابی Asterisk، FreePBX، SIP/PJSIP، RTP، AMI، ARI، AGI، Dialplan، IVR، Queue و CDR/CEL با تمرکز بر امنیت، idempotency، observability و تست. |
 
 ## انتخاب مهارت
 
-- جلسه ترمینال PowerShell با تأیید mutation؟ → `/karavi-powershell-session`
+- جلسه ترمینال Windows/PowerShell با تأیید mutation؟ → `/karavi-terminal-session`
 - راه‌اندازی، ساختار کامل و مهاجرت ساختارهای قبلی `karavi/`؟ → `/karavi-folder init` یا `/karavi-folder create` (پیش‌فرض: کامل / Full)
 - پاک‌کردن لاگ‌ها / کش / آرت‌فکت‌ها؟ → `/karavi-folder clean` (با `--deep` برای پاک‌سازی کامل)
 ## محتوا
