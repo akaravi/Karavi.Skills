@@ -15,6 +15,7 @@ so treat every file here as a public API.
 
 | Skill | Does |
 |---|---|
+| `karavi-powershell-session/` | Supervised PowerShell sessions: user interactive login, agent read-only without approval, mutation only after explicit approval, terminal monitoring, safe prompts/secrets. |
 | `karavi-folder/` | Initializes and scaffolds the standard `karavi/` workspace tree (Full structure by default: 18 folders), migrates/renames legacy folders, and removes temporary data (the `karavi.temp.*` folders and caches). Two sections: init/create main folders, then delete temp info. |
 
 ## File layout
