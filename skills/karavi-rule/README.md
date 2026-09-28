@@ -27,6 +27,21 @@ i18n و accessibility در Global Rule باقی می‌مانند. رویه‌ه
 
 ## نصب
 
+### نصب خود `karavi-rule`
+
+ابتدا خود Skill اصلی را نصب کنید:
+
+```powershell
+npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-rule
+```
+
+پس از نصب، وجود و خوانایی فایل `SKILL.md` را در runtime Agent بررسی کنید.
+
+### نصب وابستگی‌های اجباری
+
+`karavi-rule` برای اجرای کامل خود به این سه Skill وابسته است؛ هر سه را جداگانه
+نصب و سپس Verify کنید:
+
 ```powershell
 npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-council
 npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
