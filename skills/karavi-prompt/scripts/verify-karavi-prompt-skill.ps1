@@ -31,7 +31,8 @@ $required = @(
     'references/evaluation-and-scoring.md', 'references/templates.md',
     'scripts/karavi-prompt.common.psm1', 'scripts/karavi-prompt.guard.ps1',
     'scripts/karavi-prompt.panel.ps1', 'scripts/karavi-prompt.arm.ps1',
-    'scripts/karavi-prompt.ledger.ps1', 'scripts/verify-karavi-prompt-skill.ps1',
+    'scripts/karavi-prompt.ledger.ps1', 'scripts/karavi-prompt.auto.ps1',
+    'scripts/verify-karavi-prompt-skill.ps1',
     'tests/karavi-prompt.guard.Tests.ps1', 'tests/karavi-prompt.pipeline.Tests.ps1',
     'tests/fixtures/rtl-armed-prompt.txt'
 )

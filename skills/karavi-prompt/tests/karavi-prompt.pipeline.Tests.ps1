@@ -3,6 +3,7 @@ $scripts = Join-Path $skillRoot 'scripts'
 $arm = Join-Path $scripts 'karavi-prompt.arm.ps1'
 $panel = Join-Path $scripts 'karavi-prompt.panel.ps1'
 $ledger = Join-Path $scripts 'karavi-prompt.ledger.ps1'
+$auto = Join-Path $scripts 'karavi-prompt.auto.ps1'
 Import-Module (Join-Path $scripts 'karavi-prompt.common.psm1') -Force
 
 # The scripts are documented as shell entry points, and they terminate with
@@ -197,5 +198,38 @@ Describe 'karavi-prompt arming pipeline' {
         Measure-KaraviPromptDisplayWidth -Text ([string][char]0x4E2D) | Should Be 2
         Measure-KaraviPromptDisplayWidth -Text ('a' + [char]0x200D + 'b') | Should Be 2
         Measure-KaraviPromptDisplayWidth -Text '' | Should Be 0
+    }
+
+    It 'toggles auto on, status, and auto off correctly' {
+        $w = New-Workspace
+        try {
+            # 1. Initial status should be OFF
+            $s0 = Invoke-SkillScript -Script $auto -Arguments @('-Status', '-Format', 'Json', '-RepoRoot', $w.Root)
+            $s0.Exit | Should Be 0
+            $json0 = $s0.Text | ConvertFrom-Json
+            $json0.enabled | Should Be $false
+
+            # 2. Turn auto ON
+            $s1 = Invoke-SkillScript -Script $auto -Arguments @('-On', '-Targets', 'task,pm-builder', '-Format', 'Json', '-RepoRoot', $w.Root)
+            $s1.Exit | Should Be 0
+            $json1 = $s1.Text | ConvertFrom-Json
+            $json1.enabled | Should Be $true
+            $json1.targets.Count | Should Be 2
+
+            # 3. Status should now report ON
+            $s2 = Invoke-SkillScript -Script $auto -Arguments @('-Status', '-RepoRoot', $w.Root)
+            $s2.Text | Should Match 'AUTO ON'
+            $s2.Text | Should Match 'Targets: task, pm-builder'
+
+            # 4. Turn auto OFF
+            $s3 = Invoke-SkillScript -Script $auto -Arguments @('-Off', '-Format', 'Json', '-RepoRoot', $w.Root)
+            $s3.Exit | Should Be 0
+            $json3 = $s3.Text | ConvertFrom-Json
+            $json3.enabled | Should Be $false
+
+            # 5. Status should now report OFF
+            $s4 = Invoke-SkillScript -Script $auto -Arguments @('-Status', '-RepoRoot', $w.Root)
+            $s4.Text | Should Match 'AUTO OFF'
+        } finally { Remove-Item -LiteralPath $w.Root -Recurse -Force -ErrorAction SilentlyContinue }
     }
 }

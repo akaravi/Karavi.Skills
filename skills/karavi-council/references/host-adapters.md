@@ -1,22 +1,57 @@
-# Host Adapter Contract
+# Host Adapters & Runtime Integration
 
-Only the Chair varies by harness. Principal and Adversary remain independent
-read-only processes when the host supports them.
+این سند راهنمای نحوه اتصال، تطبیق و استفاده از قابلیت‌های محیط‌های مختلف میزبانی (Harnesses / Hosts) در مهارت `karavi-council` است.
 
-| Capability | Required behavior |
-|---|---|
-| File writes | Chair writes every artifact using the host's safe edit tool |
-| Shell | Chair can run bounded commands and wait for seat output |
-| Read-back | Chair reads and verifies every generated artifact |
-| Persistence | Chair can continue turns or resume from `_state.md` |
-| Rules | Chair loads the target repository's rules before Phase 0 |
+---
 
-If any capability is missing, state the limitation before starting and classify
-the run as blocked or degraded according to risk. A different harness may
-continue from the same artifact directory because artifacts, not context, are
-the state.
+## ۱. جدول ماتریس قابلیت‌های میزبان‌ها (Host Capabilities Matrix)
 
-The target repository's `AGENTS.md`, `CLAUDE.md`, project rules, security policy,
-and explicit user instructions outrank this adapter. The plan may mention a
-project-specific execution skill, but must not require a skill unavailable to
-the future executor.
+| بستر میزبان (Host) | اجرای پس‌زمینه (Background Agents) | ترمینال تعاملی / PTY | ابزار مرورگر (Browser) | ذخیره‌سازی وضعیت (State Persist) |
+|---|---|---|---|---|
+| **omp / OpenCode** | بله (از طریق `task` و `workpool`) | بله (از طریق `bash` و `pty`) | بله (Chromium درایور و helperها) | آرت‌فکت‌های `local://` و URL سیستم |
+| **Claude Code** | بله (تسک‌های موازی) | خیر (شل استاندارد) | نیازمند ابزارهای بیرونی | فایل‌های دیسک و لاگ‌های نشست |
+| **Cursor / Cline** | خیر (ترتیبی با کاربر) | بله (ترمینال داخلی IDE) | خیر | وضعیت ادیتور و پایگاه‌های محلی |
+
+---
+
+## ۲. استراتژی تطبیق خودکار (Adaptive Execution Fallback)
+
+اگر قابلیتی در بستر فعلی فعال نباشد، فرایند متوقف نمی‌شود؛ بلکه در حالت **کاهش‌یافته هوشمند (Degraded Mode)** با حفظ قرارداد کیفیت ادامه می‌یابد:
+
+1. **نبود امکان اجرای موازی چند ایجنت:** Agent Main تمام نقش‌های Council (رئیس شورا، نقاد، مشتری، معمار) را به‌صورت ترتیبی و گام‌به‌گام با سوییچ نقش اجرا و ثبت می‌کند.
+2. **نبود ابزار مرورگر:** بررسی‌های بصری به خروجی لاگ‌های کامپایلر، تست‌های Unit/E2E خط فرمان و گزارش‌های استاتیک واگذار می‌شود.
+3. **عدم دسترسی به شل PTY:** اجرای دستورات به شل ساده خطی با timeout استاندارد تغییر می‌یابد.
+
+---
+
+## ۳. مثال‌های عملیاتی تطبیق میزبان
+
+### سناریو ۱: اجرای شورا در محیط omp با فراخوانی زیرسیستم‌ها
+
+```powershell
+# ایجنت اصلی شورا سند brief را تدوین کرده و برای ارزیابی امنیتی ساب‌ایجنت را صدا می‌زند:
+# اگر محیط دارای ابزار task باشد:
+task(
+  context: "بررسی مخاطرات امنیتی ماژول احراز هویت",
+  tasks: [
+    {
+      agent: "expert-infra-security",
+      task: "بررسی هدرهای امنیتی و مسیرهای نشت سکرت در فایل auth.ts",
+      solutionSpace: "بررسی الگوهای استاندارد OWASP"
+    }
+  ]
+)
+```
+
+### سناریو ۲: اجرای شورا در محیط متنی ساده (توالی نقش‌ها در یک جلسه)
+
+```text
+[شورا — نقش معمار (Principal)]
+بررسی معماری: استفاده از پایگاه داده SQLite برای کش محلی ترانک‌ها مناسب است، زیرا تأخیر شبکه را به صفر می‌رساند.
+
+[شورا — نقش منتقد (Adversary)]
+نقد امنیتی: در محیط‌های چندپروسسی، قفل‌های دیتابیس SQLite ممکن است در حین نوشتن همزمان تماس‌ها باعث تاخیر یا crash شوند. راهکار جایگزین: استفاده از حافظه رم پایدار (Redis یا In-Memory Dictionary) همراه با مکانیزم flush دوره‌ای.
+
+[شورا — تصمیم قطعی (ADR)]
+گزینه برگزیده: پیاده‌سازی کش در حافظه رم با همگام‌سازی ناهمگام (Async Flush).
+```

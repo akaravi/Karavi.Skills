@@ -193,6 +193,67 @@ function Get-KaraviPromptLedgerPath {
     param([string]$RepoRoot)
     return (Join-Path (Get-KaraviPromptRoot -RepoRoot $RepoRoot) 'karavi-prompt.jsonl')
 }
+function Get-KaraviPromptAutoStatePath {
+    param([string]$RepoRoot)
+    return (Join-Path (Get-KaraviPromptRoot -RepoRoot $RepoRoot) 'auto-state.json')
+}
+
+function Get-KaraviPromptAutoState {
+    <#
+    .SYNOPSIS
+    Reads the auto arming configuration state (enabled, targets, defaults).
+    #>
+    param([string]$RepoRoot)
+
+    $path = Get-KaraviPromptAutoStatePath -RepoRoot $RepoRoot
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+        return [pscustomobject]@{
+            enabled    = $false
+            updatedAt  = $null
+            targets    = @()
+            mode       = 'intercept'
+            rawOnly    = $false
+        }
+    }
+
+    try {
+        $json = Get-Content -LiteralPath $path -Raw -Encoding UTF8 | ConvertFrom-Json
+        return $json
+    } catch {
+        return [pscustomobject]@{
+            enabled    = $false
+            updatedAt  = $null
+            targets    = @()
+            mode       = 'intercept'
+            rawOnly    = $false
+        }
+    }
+}
+
+function Set-KaraviPromptAutoState {
+    <#
+    .SYNOPSIS
+    Sets or disables the auto arming configuration for subagent dispatches.
+    #>
+    param(
+        [Parameter(Mandatory)][bool]$Enabled,
+        [string[]]$Targets = @(),
+        [string]$RepoRoot
+    )
+
+    $path = Get-KaraviPromptAutoStatePath -RepoRoot $RepoRoot
+    $obj = [ordered]@{
+        enabled   = $Enabled
+        updatedAt = [datetime]::UtcNow.ToString('o')
+        targets   = @($Targets)
+        mode      = if ($Enabled) { 'auto' } else { 'manual' }
+    }
+
+    $json = ConvertTo-KaraviPromptJson -Object ([pscustomobject]$obj)
+    Write-KaraviPromptFile -Path $path -Content $json
+    return [pscustomobject]$obj
+}
+
 
 function Write-KaraviPromptFile {
     <#
@@ -425,4 +486,7 @@ Export-ModuleMember -Function `
     Get-KaraviPromptNormalizedModel,
     Test-KaraviPromptKnownModel,
     Get-KaraviPromptPatternSet,
-    Get-KaraviPromptGlyph
+    Get-KaraviPromptGlyph,
+    Get-KaraviPromptAutoStatePath,
+    Get-KaraviPromptAutoState,
+    Set-KaraviPromptAutoState

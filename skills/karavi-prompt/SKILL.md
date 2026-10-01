@@ -5,8 +5,8 @@ description: >
   agent is first engineered — intent contract, structure, grounding, constraints,
   output format, token budget — then shown to the user in an "in execution"
   panel, then dispatched to the target agent in its armed form. TRIGGER when:
-  the user says "/karavi-prompt", "karavi prompt", "پرامپت مهندسی‌شده",
-  "پرامپت مسلح‌شده", "کادر اجرای پرامپت", "before sending a prompt to the
+  the user says "/karavi-prompt", "karavi prompt", "auto on", "auto off",
+  "پرامپت مهندسی‌شده", "پرامپت مسلح‌شده", "کادر اجرای پرامپت", "before sending a prompt to the
   agent", "arm this prompt", "optimize this prompt", "engineer this prompt",
   "prompt panel", "show me the prompt before it runs", or wants a prompt
   rewritten, structured, grounded, secured, or scored before execution.
@@ -49,6 +49,21 @@ When responding conversationally under this skill, address the user as
    the panel says so, and `karavi-terminal` still owns the mutation approval.
 8. **Ledger every run.** One `jsonl` record per armed prompt with its digest,
    guard verdict, and outcome. That ledger is the eval set's seed.
+
+## Auto mode (auto on / auto off)
+
+`karavi-prompt` supports an **automatic interception mode** that can arm and guard every prompt bound for any subagent without waiting for manual command-line invocation per prompt:
+
+- **`/karavi-prompt auto on`**: Activates automatic arming for all outgoing subagent dispatches (`task`, `pm-*`, `expert-*`, `scout`, `reviewer`). In this mode, whenever a subagent dispatch is prepared, the main agent automatically runs the prompt through `INTAKE → ENGINEER → GUARD → PANEL` before sending.
+- **`/karavi-prompt auto off`**: Deactivates auto mode and returns to explicit manual invocation (`/karavi-prompt arm "<prompt>"`).
+- **`/karavi-prompt auto status`**: Inspects current auto-arming state and targeted subagents.
+
+CLI helper:
+```powershell
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -On -Targets task,pm-builder
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -Off
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -Status
+```
 
 ## The pipeline
 
@@ -245,6 +260,7 @@ it is written.
 | `scripts/karavi-prompt.guard.ps1` | Standalone GUARD: secret, injection, taint, contract, placeholder, arm-delta, budget, portability, mode |
 | `scripts/karavi-prompt.panel.ps1` | Render the panel alone as box, markdown, or JSON |
 | `scripts/karavi-prompt.ledger.ps1` | Append, list, and close run records; `-Purge` removes run artifacts older than `-OlderThanDays` |
+| `scripts/karavi-prompt.auto.ps1` | Configure and toggle auto on / auto off mode for subagent prompt interception |
 | `scripts/karavi-prompt.common.psm1` | Shared helpers: token estimate, digest, redaction, width, encoding |
 | `scripts/verify-karavi-prompt-skill.ps1` | Read-only structural and encoding verification |
 

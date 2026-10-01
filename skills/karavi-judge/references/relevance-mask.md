@@ -1,13 +1,73 @@
-# 7Expert Relevance Mask
+# 7Expert Relevance Mask & Decision Framework
 
-| Domain | Mark relevant when | Typical evidence |
+این سند راهنمای رسمی نحوه گزینش، فیلتر و ارزیابی هفت حوزهٔ تخصصی (7Expert) در مهارت `karavi-judge` است. هدف این ماسک، تمرکز روی بخش‌های واقعی تحت تأثیر و جلوگیری از گزارش‌های تشریفاتی و تکراری است.
+
+---
+
+## ۱. جدول مرجع گزینش حوزه‌ها (Relevance Decision Table)
+
+| حوزه (Domain) | چه زمانی `relevant` است؟ | شواهد و معیارهای ارزیابی الزامی |
 |---|---|---|
-| Management & Business | goal, priority, KPI, users, cost, roadmap, or scope changes | brief, acceptance, value/risk decision |
-| UX/UI | user flow, layout, interaction, accessibility, theme, or RTL/LTR changes | flow, states, screenshots, keyboard evidence |
-| Frontend | client components, state, routing, i18n, performance, or browser behavior changes | diff, build, tests, browser evidence |
-| Backend & Architecture | API, domain, persistence boundary, concurrency, or integration changes | contract, architecture, migration, failure tests |
-| Infrastructure & Security | secrets, auth, headers, network, runtime, deployment, logs, or resilience changes | scan, config audit, health/fault evidence |
-| Quality & Testing | acceptance, regression, test data, gates, or release confidence changes | test matrix, commands, results, defects |
-| Content & SEO | public content, metadata, indexing, canonical, hreflang, or copy changes | locale/key parity, metadata and link checks |
+| **۱. مدیریت و کسب‌وکار (Management & Business)** | تغییر در اهداف، اولویت‌ها، KPI، تجربه کاربر، هزینه‌ها یا اسکوپ محصول | سند بریف، تعریف شفاف Done، ارزش افزوده، ریسک‌های باقیمانده |
+| **۲. رابط و تجربه کاربری (UX/UI)** | تغییر در جریان کاربر، چیدمان صفحات، تعاملات، دسترس‌پذیری، تم یا راست‌به‌چپ (RTL/LTR) | ماکاپ‌ها، تست کیبورد و Focus، اسکرین‌شات‌ها و سازگاری با تم‌های مختلف |
+| **۳. فرانت‌اند (Frontend)** | کامپوننت‌های سمت کلاینت، State Management، روتینگ، i18n، کارایی و مرورگر | تست‌های کامپوننت، لاگ بیلد بدون خطا، شواهد اجرای واقعی در مرورگر |
+| **۴. بک‌اند و معماری (Backend & Architecture)** | تغییر قرارداد API، مدل‌های دامنه، مرزهای Persistence، همزمانی، پایگاه داده یا یکپارچگی سیستم‌ها | قراردادهای DTO، تست‌های شکست و Failure Path، ترنزکشن و Idempotency |
+| **۵. زیرساخت و امنیت (Infrastructure & Security)** | سکرت‌ها، احراز هویت، هدرهای امنیتی، تنظیمات شبکه، داکر، لاگ‌ها، تاب‌آوری و Deploy | اسکن عدم نشت سکرت، لاگ استراکچرد با TraceID، سیاست‌های فایروال و TLS |
+| **۶. کیفیت و تست (Quality & Testing)** | معیارهای پذیرش، تست‌های رگرسیون، داده‌های تست و گیت‌های انتشار | گزارش اجرای کامل تست‌ها (Unit/Integration)، درصد پوشش و سناریوی خطا |
+| **۷. محتوا و سئو (Content & SEO)** | متون نمایشی، متادیتا، تگ‌های ایندکس، آدرس‌های Canonical، تگ‌های hreflang و برابری زبان‌ها | برابری کلیدهای متنی fa/en، صحت متادیتا و سلامت لینک‌های داخلی |
 
-Mark `not-relevant` only with a short scope reason. Do not invent analysis for a not-relevant domain. The mask is one artifact, not seven repetitive reports.
+---
+
+## ۲. قانون علامت‌گذاری `not-relevant`
+
+حوزه‌ای که تغییری در آن رخ نداده است باید صریحاً `not-relevant` علامت‌گذاری شود، اما همراه با **یک دلیل مستند و کوتاه**. تولید تحلیل‌های ساختگی، فرضی یا بی‌اثر برای حوزه‌های غیرمرتبط ممنوع است. ماسک باید یک سند واحد، فشرده و متمرکز باشد، نه ۷ گزارش طولانی تکراری.
+
+---
+
+## ۳. مثال‌های واقعی از ماسک‌های هفت‌گانه
+
+### مثال ۱: سناریوی تغییر ترانک SIP و افزودن متد احراز هویت در بک‌اند
+در این سناریو، فقط بک‌اند، زیرساخت و کیفیت متأثر می‌شوند.
+
+```text
+=== 7EXPERT RELEVANCE MASK ===
+1. Management & Business: not-relevant (تغییری در مدل درآمدی، اسکوپ بیزینس یا KPI صورت نگرفته است)
+2. UX/UI: not-relevant (سرویس بدون رابط کاربری و مبتنی بر پروتکل صوتی است)
+3. Frontend: not-relevant (کد کلاینت وب یا موبایل تغییری نکرده است)
+4. Backend & Architecture: RELEVANT
+   - شواهد: اعتبارسنجی هدر Digest Auth در PJSIP و جداسازی کانتکست‌های ترانک
+   - وضعیت: PASS (قرارداد با استاندارد RFC 3261 همخوان است)
+5. Infrastructure & Security: RELEVANT
+   - شواهد: بررسی متغیرهای محیطی سکرت‌ها و مسدودسازی پورت ۵۰۶۰ به جز IP پرووایدر
+   - وضعیت: PASS (سکرت هاردکد نشده، پورت مدیا با فایروال محدود شده است)
+6. Quality & Testing: RELEVANT
+   - شواهد: اجرای تست SIPp با ۱۰۰ تماس همزمان و نرخ خطای صفر
+   - وضعیت: PASS (تمام ۱۰ تست رگرسیون پاس شدند)
+7. Content & SEO: not-relevant (محتوای عمومی وب‌سایت یا سورس مارک‌دان تغییری نکرده است)
+==============================
+```
+
+### مثال ۲: سناریوی افزودن فرم لاگین با پشتیبانی دو زبانه (fa/en)
+در این سناریو حوزه‌های فرانت‌اند، امنیت، UI/UX، محتوا و کیفیت مستقیماً درگیرند:
+
+```text
+=== 7EXPERT RELEVANCE MASK ===
+1. Management & Business: not-relevant (قابلیت استاندارد احراز هویت طبق رودمپ جاری)
+2. UX/UI: RELEVANT
+   - شواهد: تست Focus کیبورد، تطبیق فونت فارسی و رعایت فاصله‌ها در حالت RTL
+   - وضعیت: PASS
+3. Frontend: RELEVANT
+   - شواهد: ذخیره توکن در httpOnly Cookie و رندر کلاینتی خطاها بدون ریفرش صفحه
+   - وضعیت: PASS
+4. Backend & Architecture: not-relevant (اندپوینت auth قبلاً پیاده‌سازی و نهایی شده است)
+5. Infrastructure & Security: RELEVANT
+   - شواهد: بررسی هدرهای X-Frame-Options و CSP، عدم نشت پسورد در کنسول مرورگر
+   - وضعیت: PASS
+6. Quality & Testing: RELEVANT
+   - شواهد: تست لاگین ناموفق با رمز عبور اشتباه و فعال‌سازی محدودیت تلاش مجدد
+   - وضعیت: PASS
+7. Content & SEO: RELEVANT
+   - شواهد: برابری کامل کلیدهای fa.json و en.json بدون هیچ متن هاردکدشده
+   - وضعیت: PASS
+==============================
+```

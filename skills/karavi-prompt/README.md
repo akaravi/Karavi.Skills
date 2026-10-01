@@ -61,6 +61,18 @@ URL می‌تواند خودش را دستور جا بزند)، و **معیار 
 7. mode در کادر اعلام می‌شود؛ کادر مجوز mutation جایگزین `karavi-terminal` نمی‌شود.
 8. هر اجرا یک خط در ledger ثبت می‌کند؛ run بسته‌نشده به eval set کمک نمی‌کند.
 
+## حالت خودکار (auto on / auto off)
+
+`karavi-prompt` علاوه بر اجرای دستی، از مکانیزم **هدایت خودکار (Auto Mode)** پشتیبانی می‌کند تا قبل از dispatch هر پرامپتی به subagentها، خودکار مسلح و مهار شود:
+
+| دستور چت | اثر | معادل اسکریپتی |
+|---|---|---|
+| `/karavi-prompt auto on` | فعال‌سازی خودکار تسلیح برای تمام ساب‌ایجنت‌ها | `& .\scripts\karavi-prompt.auto.ps1 -On` |
+| `/karavi-prompt auto off` | بازگشت به حالت دستی و غیرفعال‌سازی تسلیح خودکار | `& .\scripts\karavi-prompt.auto.ps1 -Off` |
+| `/karavi-prompt auto status` | مشاهده وضعیت فعلی رهگیری خودکار و ایجنت‌های هدف | `& .\scripts\karavi-prompt.auto.ps1 -Status` |
+
+هنگامی که `auto on` است، ایجنت اصلی بدون نیاز به دستور مجدد کاربر، پرامپت ارسالی به subagent را ابتدا مهندسی، اسکن سکرت/تزریق و کادر‌بندی کرده و سپس ارسال می‌کند.
+
 ## نصب
 
 ```bash
@@ -89,6 +101,11 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-prompt
 # کادر ASCII برای ترمینالی که UTF-8 را نمی‌کشد
 & .agents/skills/karavi-prompt/scripts/karavi-prompt.panel.ps1 -Run <envelope.json> -Ascii
 ```
+
+# فعال و غیرفعال‌سازی خودکار تسلیح پرامپت‌ها به ساب‌ایجنت‌ها
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -On -Targets task,pm-builder
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -Off
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -Status
 
 خروجی `arm.ps1`: کادر، سپس `RUN`، `VERDICT`، `ENVELOPE`، `PROMPT`، و پس از
 `---DISPATCH---` خودِ متن مسلح‌شده. روی `block` هیچ کادری رسم نمی‌شود و فقط

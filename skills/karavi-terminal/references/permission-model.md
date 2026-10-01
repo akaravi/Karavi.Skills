@@ -1,5 +1,79 @@
-# Permission model
+# Permission Model & Safety Enforcement
 
-Read-only runs without approval; report exit code and masked evidence.
-Mutation requires [درخواست اجرا — MUTATION] and explicit user OK.
-Default timeout 120s. Deploy/FTP only on explicit Deploy.
+این سند راهنمای رسمی مدل مجوزها، مرزهای امنیتی و قوانین بازرسی اجرای دستورات در مهارت `karavi-terminal` است.
+
+---
+
+## ۱. اصول حاکم بر مجوزها (Core Principles)
+
+1. **اصل تفکیک نیت (Intent Classification):** مجوزها بر اساس اثر واقعی دستور روی محیط سنجیده می‌شوند، نه صرفاً واژهٔ اول کامند. اگر در یک پایپ‌لاین حتی یک مرحله تغییردهنده وضعیت باشد، کل پایپ‌لاین `Mutation` محسوب می‌شود.
+2. **اجرای خودکار Read-Only:** کسب شواهد، مانیتورینگ وضعیت سیستم، بررسی پورت‌ها، تست مسیرهای شبکه و مشاهده فایل‌ها بدون معطلی و بدون نیاز به تأیید کاربر اجرا می‌شوند.
+3. **توقف و اخذ تأیید برای Mutation:** هر عملیاتی که تغییری در فایل، پروسه، سرویس، ساختار شبکه، دیتابیس یا گیت ایجاد کند، باید قبل از فراخوانی در قالب مشخص تأییدیه کاربر را دریافت کند.
+4. **زمان‌بندی و انقضا (Timeout):** پیش‌فرض انقضای هر دستور ۱۲۰ ثانیه است؛ دستورات تعاملی یا طولانی‌تر باید با پارامتر اختصاصی فراخوانی شوند.
+
+---
+
+## ۲. فرمت استاندارد درخواست تأیید Mutation
+
+هنگامی که ایجنت نیاز به اجرای یک دستور تغییردهنده وضعیت دارد، ملزم است فرمت زیر را به صورت دقیق به کاربر نمایش داده و منتظر پاسخ صریح بماند:
+
+```text
+╔══════════════════════════════════════════════════════════════════════╗
+║  [درخواست اجرا — MUTATION]                                           ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  دستور      : Restart-Service -Name "TelephonyGateway"               ║
+║  دامنه/محیط : Windows Service (Local Environment)                    ║
+║  ریسک       : قطع ارتباط لحظه‌ای سوکت‌های فعال و ثبت خطا در کلاینت   ║
+║  روش ارزیابی: Get-Service -Name "TelephonyGateway" (بررسی وضعیت Running)║
+╚══════════════════════════════════════════════════════════════════════╝
+آیا این دستور اجرا شود؟ (بله / خیر)
+```
+
+---
+
+## ۳. جدول تفکیک دقیق دستورات همراه با مثال
+
+| دسته‌بندی | نوع مجوز | نمونه دستورات | روش تأیید صحت (Verification) |
+|---|---|---|---|
+| **بررسی سرویس و پروسه** | Read-Only | `Get-Service`, `Get-Process`, `ps aux` | بررسی فیلد `Status` یا PID |
+| **تغییر وضعیت سرویس** | Mutation | `Start-Service`, `Stop-Service`, `Restart-Service`, `systemctl restart` | بررسی تغییر وضعیت به `Running` یا `Stopped` |
+| **شبکه و پورت** | Read-Only | `Test-NetConnection -Port 5060`, `ss -tulpn`, `ping` | مشاهده موفقیت اتصال TCP/UDP |
+| **فایروال و روتینگ** | Mutation | `New-NetFirewallRule`, `iptables -A`, `route add` | کوئری مجدد از جدول فایروال جهت ثبت رول |
+| **فایل‌سیستم خواندنی** | Read-Only | `Get-ChildItem`, `Get-Content`, `cat`, `ls` | بازگرداندن متن فاقد سکرت |
+| **فایل‌سیستم نوشتنی** | Mutation | `Set-Content`, `Remove-Item`, `New-Item`, `rm` | بررسی وجود فایل با `Test-Path` |
+| **گیت (مشاهده)** | Read-Only | `git status`, `git log -n 5`, `git diff` | لاگ وضعیت برنچ |
+| **گیت (تغییر وضعیت)** | Mutation | `git commit`, `git checkout -b`, `git reset` | ارزیابی شناسه کامیت ثبت‌شده |
+
+---
+
+## ۴. مثال کاربردی در سناریوی اجرای ترکیبی
+
+در صورتی که ایجنت بخواهد یک پروسه را ریستارت کند و سلامت آن را بسنجد، جریان زیر اعمال می‌شود:
+
+```powershell
+# گام ۱: خواندن وضعیت فعلی (Read-Only — خودکار و بدون پرسش)
+$svc = Get-Service -Name "asterisk" -ErrorAction SilentlyContinue
+Write-Output "Current status: $($svc.Status)"
+
+# گام ۲: درخواست تأیید برای بازنشانی سرویس (Mutation — توقف برای تأیید کاربر)
+# ایجنت بلاک [درخواست اجرا — MUTATION] را در چت ارسال می‌کند.
+
+# گام ۳: پس از دریافت تأیید صریح، دستور اجرا می‌شود:
+Restart-Service -Name "asterisk"
+
+# گام ۴: راستی‌آزمایی نتیجه با دستور Read-Only بدون تأیید مجدد:
+$verify = Get-Service -Name "asterisk"
+if ($verify.Status -eq 'Running') {
+    Write-Output "VERIFIED: Service restarted successfully."
+} else {
+    Write-Error "FAILED: Service is in $($verify.Status) state."
+}
+```
+
+---
+
+## ۵. حفاظت از سکرت‌ها و ماسک‌کردن داده‌ها
+
+- هیچ رمزی، کلید API یا توکنی نباید در خروجی لاگ یا دستور ظاهر شود.
+- مقادیر حساس با مقدار `[REDACTED]` ماسک می‌شوند.
+- دستورات شامل استقرار کدهای راه دور (`Deploy` / `FTP`) بدون وجود توکن اختصاصی مجاز نیستند.
