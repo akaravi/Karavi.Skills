@@ -13,8 +13,11 @@ param(
     [double]$Score = 0,
 
     [Parameter(Mandatory, ParameterSetName = 'List')][switch]$List,
+    [Parameter(Mandatory, ParameterSetName = 'Purge')][switch]$Purge,
+    [int]$OlderThanDays = 14,
     [string]$RepoRoot,
-    [int]$Last = 0
+    [int]$Last = 0,
+    [switch]$WhatIf
 )
 
 Set-StrictMode -Version Latest
@@ -35,6 +38,32 @@ if ($PSCmdlet.ParameterSetName -eq 'List') {
     Write-Output "LEDGER=$ledgerPath"
     Write-Output "ENTRIES=$($lines.Count)"
     foreach ($l in $lines) { Write-Output $l }
+    exit 0
+}
+
+if ($PSCmdlet.ParameterSetName -eq 'Purge') {
+    # Scoped to the directory this skill creates. karavi-folder clean does not
+    # recurse, so the runs subtree is this skill's own responsibility.
+    $runsRoot = Get-KaraviPromptRunsRoot -RepoRoot $RepoRoot
+    if (-not (Test-Path -LiteralPath $runsRoot -PathType Container)) {
+        Write-Output "RUNS=$runsRoot"
+        Write-Output 'REMOVED=0'
+        exit 0
+    }
+    $cutoff = [datetime]::UtcNow.AddDays(-$OlderThanDays)
+    $removed = 0
+    foreach ($f in (Get-ChildItem -LiteralPath $runsRoot -File -ErrorAction SilentlyContinue)) {
+        if ($f.LastWriteTimeUtc -ge $cutoff) { continue }
+        if ($WhatIf) { Write-Output "WhatIf: $($f.FullName)" }
+        else { Remove-Item -LiteralPath $f.FullName -Force -ErrorAction SilentlyContinue }
+        $removed++
+    }
+    if (-not $WhatIf) {
+        $left = @(Get-ChildItem -LiteralPath $runsRoot -Force -ErrorAction SilentlyContinue)
+        if ($left.Count -eq 0) { Remove-Item -LiteralPath $runsRoot -Force -ErrorAction SilentlyContinue }
+    }
+    Write-Output "RUNS=$runsRoot"
+    Write-Output "REMOVED=$removed"
     exit 0
 }
 

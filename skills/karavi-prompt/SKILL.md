@@ -216,6 +216,18 @@ host-by-host wiring: [panel-and-dispatch.md](references/panel-and-dispatch.md).
 - If the user edits the panel's armed text, the run is re-armed: new digest,
   new guard, new panel. Editing after dispatch is a new run, not a patch.
 
+Runs and the ledger live under `karavi.temp.status/karavi-prompt/`. That path is
+under `karavi.temp.status`, but `karavi-folder clean` is not recursive and will
+not reach the `runs/` subtree — purge it with this skill's own command, which
+touches nothing outside that directory:
+
+```powershell
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.ledger.ps1 -Purge -OlderThanDays 14 -WhatIf
+```
+
+Never store a prompt that contains a secret there; the guard blocks that before
+it is written.
+
 ## Exit codes
 
 | Code | Meaning |
@@ -232,13 +244,9 @@ host-by-host wiring: [panel-and-dispatch.md](references/panel-and-dispatch.md).
 | `scripts/karavi-prompt.arm.ps1` | Run GUARD on a spec, build the run envelope, render the panel, append the ledger line, emit the dispatch text |
 | `scripts/karavi-prompt.guard.ps1` | Standalone GUARD: secret, injection, taint, contract, placeholder, arm-delta, budget, portability, mode |
 | `scripts/karavi-prompt.panel.ps1` | Render the panel alone as box, markdown, or JSON |
-| `scripts/karavi-prompt.ledger.ps1` | Append, list, and close run records in `karavi-prompt.jsonl` |
+| `scripts/karavi-prompt.ledger.ps1` | Append, list, and close run records; `-Purge` removes run artifacts older than `-OlderThanDays` |
 | `scripts/karavi-prompt.common.psm1` | Shared helpers: token estimate, digest, redaction, width, encoding |
 | `scripts/verify-karavi-prompt-skill.ps1` | Read-only structural and encoding verification |
-
-Runs and the ledger live under `karavi.temp.status/karavi-prompt/`, which
-`karavi-folder clean` removes. Never store a prompt that contains a secret
-there; the guard blocks that before it is written.
 
 ## Acceptance checklist
 

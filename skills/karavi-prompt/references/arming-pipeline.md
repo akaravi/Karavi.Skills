@@ -225,8 +225,8 @@ of the armed digest. Deterministic, sortable, and correlatable with the ledger.
 line, append-only:
 
 ```json
-{"ts":"2026-10-01T08:14:55Z","id":"kp-…-4f9ac2","event":"armed","verdict":"warn","digest":"sha256:…","target":"omp/task","mode":"read-only","rawTokens":118,"armedTokens":402}
-{"ts":"2026-10-01T08:19:02Z","id":"kp-…-4f9ac2","event":"closed","outcome":"accept","score":4.2,"note":"rubric 8-dimension, karavi-judge verdict"}
+{"ts":"2026-10-01T08:14:55Z","id":"kp-...-4f9ac2","event":"armed","verdict":"warn","digest":"sha256:...","target":"omp/task","mode":"read-only","rawTokens":118,"armedTokens":402}
+{"ts":"2026-10-01T08:19:02Z","id":"kp-...-4f9ac2","event":"closed","outcome":"accept","score":4.2,"note":"rubric 8-dimension, karavi-judge verdict"}
 ```
 
 `event` is `armed`, `dispatched`, or `closed`. `outcome` on close is `accept`,
@@ -235,6 +235,33 @@ already uses so the two skills read the same ledger.
 
 A `fail` or `needs-review` close contributes its raw prompt to the eval set.
 That is the loop that makes the next arming better than this one.
+
+---
+
+## Run lifecycle and cleanup
+
+Everything this skill writes lives in one directory it owns:
+
+```text
+karavi.temp.status/karavi-prompt/
+|-- karavi-prompt.jsonl          append-only ledger
+`-- runs/
+    |-- <runId>.json             envelope (guard verdict, digest, dispatch)
+    |-- <runId>.armed.txt        the exact dispatched text
+    |-- <runId>.raw.txt          the unengineered input
+    `-- <runId>.panel.txt        the rendered panel
+```
+
+`karavi-folder clean` filters `karavi.temp.status/` non-recursively, so it does
+not reach `runs/`. Purge with this skill's own command, which is scoped to that
+one directory; `-WhatIf` lists what would go without removing it:
+
+```powershell
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.ledger.ps1 -Purge -OlderThanDays 14 -WhatIf
+```
+
+Runs younger than the cutoff are never touched. The ledger is not purged by
+this command; it is the eval-set seed and belongs to the user.
 
 ---
 

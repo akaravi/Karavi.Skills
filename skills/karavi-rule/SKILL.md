@@ -66,10 +66,12 @@ push, Deploy, FTP, production changes, secret access, or scope expansion.
 | workspace tree, `karavi/` migration, cleanup, or temporary-file removal | `karavi-folder` | load and follow its safety and path-boundary rules |
 | architecture, multi-part planning, consequential options, ADR, or readiness | `karavi-council` | plan first; resolve technical decisions and produce a readiness handoff |
 | implementation acceptance, regression review, evidence gate, or final delivery | `karavi-judge` | independently evaluate evidence and issue the final verdict |
+| a prompt bound for an agent, prompt engineering, or the pre-dispatch panel | `karavi-prompt` | arm the prompt, guard it, show the panel, then dispatch verbatim; optional dependency, not a mandatory install |
 
 Use the minimum relevant skill set. For a multi-phase request, the normal
-sequence is `karavi-folder` when structure is affected, then `karavi-council`
-for consequential planning, and `karavi-judge` after implementation. The
+sequence is `karavi-prompt` when a prompt is bound for an agent, then
+`karavi-folder` when structure is affected, then `karavi-council` for
+consequential planning, and `karavi-judge` after implementation. The
 Coordinator/Agent Main remains responsible for scope, synthesis, execution,
 verification, and decision routing.
 

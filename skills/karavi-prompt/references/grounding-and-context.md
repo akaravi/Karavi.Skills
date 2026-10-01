@@ -175,3 +175,44 @@ Long agent loops drift. Countermeasures, in order of leverage:
    observable from outside.
 4. A verification step before the final answer on anything consequential.
 5. Test the system prompt at turn 50, not turn 1.
+
+---
+
+## Codebase-grounded prompts
+
+For an agent that will edit an existing repository, the context layer is not
+optional background. Four rules keep it honest.
+
+**1. Detect the version boundary, then hold it.** State the exact language,
+framework, and library versions in the context layer, then constrain the prompt
+to them — "use only APIs available in the detected version". A prompt that
+omits this gets confident code written against a newer release than the project
+actually runs.
+
+**2. Never introduce an unobserved pattern.** Tell the agent to follow patterns
+actually present in the repository and not to introduce conventions it cannot
+point to in the code. This is the codebase-grounded form of the anti-assumption
+rule, and it is what stops an agent from helpfully modernizing working code.
+
+**3. Resolve contradictory evidence by recency and coverage.** Real codebases
+contain two patterns for the same thing. Give the tie-break explicitly: prefer
+the pattern in the newer file, and prefer the one with test coverage. Without
+this rule the agent picks whichever it happened to notice first.
+
+**4. Ladder the sources.** When sources disagree, the precedence is fixed and
+stated in the prompt:
+
+```text
+1. Project instruction files in the repository
+2. Patterns observed in the code itself
+3. External convention
+When in doubt, prefer consistency with the existing code over an external best
+practice, and name which rung you followed.
+```
+
+Making the agent name the rung turns a silent judgment call into something a
+reviewer can check.
+
+These four belong in the armed prompt for any `mutating` run that touches
+existing code. The panel declares the mode; the context layer is where the
+version boundary and the pattern rules live.

@@ -82,6 +82,12 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-prompt
 
 # ledger
 & .agents/skills/karavi-prompt/scripts/karavi-prompt.ledger.ps1 -Id <runId> -Event closed -Outcome accept -Score 4.2
+
+# پاک‌سازی runهای قدیمی (karavi-folder clean زیرپوشهٔ runs/ را نمی‌بیند)
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.ledger.ps1 -Purge -OlderThanDays 14 -WhatIf
+
+# کادر ASCII برای ترمینالی که UTF-8 را نمی‌کشد
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.panel.ps1 -Run <envelope.json> -Ascii
 ```
 
 خروجی `arm.ps1`: کادر، سپس `RUN`، `VERDICT`، `ENVELOPE`، `PROMPT`، و پس از
@@ -111,6 +117,7 @@ RAG، پرامپت ابزار و agent، CoT و chaining، و rubric ارزیا�
 | [prompt-architecture.md](references/prompt-architecture.md) | هفت لایه، XML در برابر markdown، ترتیب |
 | [optimization-playbook.md](references/optimization-playbook.md) | کلاس مدل، کاتالوگ تکنیک، بودجهٔ توکن، فشرده‌سازی |
 | [anti-patterns.md](references/anti-patterns.md) | کاتالوگ نقص‌ها با اصلاح |
+
 | [constraints-and-guardrails.md](references/constraints-and-guardrails.md) | طیف constraint، meta-rule، guardrail، تست |
 | [security-and-injection.md](references/security-and-injection.md) | مدل taint، لایه‌های دفاع، red-team |
 | [grounding-and-context.md](references/grounding-and-context.md) | quote-then-answer، context بلند، project map |
@@ -144,7 +151,7 @@ Invoke-Pester .agents/skills/karavi-prompt/tests
 - [`karavi-council`](../karavi-council/) — تصمیم معماری و specification
 - [`karavi-judge`](../karavi-judge/) — داوری نهایی بر اساس evidence
 - [`karavi-terminal`](../karavi-terminal/) — مجوز mutation؛ کادر آن را جایگزین نمی‌کند
-- [`karavi-folder`](../karavi-folder/) — پاک‌سازی `karavi.temp.status/karavi-prompt`
+- [`karavi-folder`](../karavi-folder/) — ساختار `karavi/`؛ `clean` زیرپوشهٔ `karavi-prompt/runs/` را نمی‌بیند، برای آن `-Purge` همین skill را اجرا کن
 
 ## License
 

@@ -52,13 +52,25 @@ armed text, verbatim.
 ║  matches karavi-folder's current cleanup rules.                     ║
 ║  …                                                                 ║
 ╠══════════════════════════════════════════════════════════════════════╣
-║  MODE NOTE: read-only. No workspace mutation is authorized by this   ║
-║  run. A mutating run still requires karavi-terminal approval.       ║
+║  MODE     : read-only — no workspace mutation is authorized by this    ║
+║  run. A mutating run still requires karavi-terminal approval.         ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
 
-The `MODE NOTE` band appears for every run. For `mutating` it names the
+The `MODE` band appears for every run. For `mutating` it names the
 approval still owed; for `network` and `secret` it names the boundary.
+
+`SIZE` reports growth relative to the raw prompt — `raw=118 tok -> armed=402
+tok (+241%)` answers "how much did arming add". With no raw prompt it prints
+`new` rather than a misleading number.
+
+### Glyphs and terminal encoding
+
+Windows PowerShell 5.1 reads a BOM-less `.ps1` as the system ANSI code page, so
+`panel.ps1` contains no literal box-drawing character; every glyph is built from
+its code point by `Get-KaraviPromptGlyph`. The script also asks the console for
+UTF-8 output, and when the host refuses it falls back to an ASCII box
+(`+--+`, `|`) automatically. Force the fallback with `-Ascii`.
 
 ### Markdown form
 
