@@ -1,0 +1,6 @@
+<mission>سند نگهداری را بازنویسی کن</mission>
+<scope>Do: ویرایش یک فایل. Do not: دست‌زدن به اسکریپت‌ها.</scope>
+<output_format>محتوای کامل فایل را در یک بلوک کد برگردان.</output_format>
+<acceptance>- فهرست قدیمی حذف شده است.
+- verify را اجرا کن</acceptance>
+You are done when the file is written. Do not ask follow-up questions.

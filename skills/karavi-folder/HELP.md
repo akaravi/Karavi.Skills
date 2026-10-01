@@ -1,12 +1,12 @@
 # karavi-folder — Help
 
 راهنمای جامع کاربر برای مهارت `karavi-folder`. این مهارت اسکلت استاندارد `karavi/` را
-به‌صورت **کامل (Full - ۱۸ فولدر به‌صورت پیش‌فرض)** می‌سازد، ساختارهای قدیمی و نام‌های قبلی
+به‌صورت **کامل (Full - ۲۱ فولدر به‌صورت پیش‌فرض)** می‌سازد، ساختارهای قدیمی و نام‌های قبلی
 را شناسایی و **مهاجرت/تغییر نام** می‌دهد، و فایل‌های موقت (`karavi.temp.*`) و کش‌ها را به‌صورت
 امن پاک‌سازی می‌کند.
 
 Complete user guide for the `karavi-folder` skill: scaffolds the standard `karavi/`
-workspace tree (Full structure by default: 18 folders), migrates and renames legacy
+workspace tree (Full structure by default: 21 folders/subfolders), migrates and renames legacy
 folder trees, and safely cleans temporary data.
 
 ---
@@ -17,11 +17,11 @@ folder trees, and safely cleans temporary data.
 
 | بخش | عملیات | توضیحات |
 |---|---|---|
-| ۱ | **مقداردهی اولیه، ساخت و مهاجرت (`init` / `create`)** | ساخت ساختار کامل (۱۸ فولدر پیش‌فرض) + تغییر نام و انتقال خودکار فولدرهای قدیمی به استاندارد جدید |
+| ۱ | **مقداردهی اولیه، ساخت و مهاجرت (`init` / `create`)** | ساخت ساختار کامل (۲۱ فولدر پیش‌فرض) + تغییر نام و انتقال خودکار فولدرهای قدیمی به استاندارد جدید |
 | ۲ | **پاک‌سازی اطلاعات موقت (`clean`)** | پاک کردن امن لاگ‌ها، گزارش‌های وضعیت، خروجی build/deploy موقت و کش‌ها |
 
 ### اصول تغییرناپذیر
-- **پیش‌فرض کامل (Full):** ساختار فولدرها به‌صورت پیش‌فرض کامل است (۱۸ فولدر).
+- **پیش‌فرض کامل (Full):** ساختار فولدرها به‌صورت پیش‌فرض کامل است (۲۱ فولدر).
 - **مهاجرت بدون از دست رفتن داده:** فولدرها و فایل‌های قبلی موجود در `karavi/` شناسایی شده و بدون حذف داده، به ساختار استاندارد جدید منتقل و تغییر نام می‌یابند.
 - **حفظ ۱۰۰٪ فایل‌های مهم:** سورس، تاریخچه تغییرات (`karavi.history`)، تنظیمات (`karavi.deploy.config`)، پرامپت‌ها و مستندات هرگز پاک نمی‌شوند.
 - **فقط در ریپوی فعلی:** هیچ‌گاه فولدری از پروژه دیگر کپی یا ایمپورت نمی‌شود.
@@ -29,10 +29,10 @@ folder trees, and safely cleans temporary data.
 
 ---
 
-## ۲) فولدرهای استاندارد (پیش‌فرض: کامل / Full — ۲۰ فولدر و زیرفولدر)
+## ۲) فولدرهای استاندارد (پیش‌فرض: کامل / Full — ۲۱ فولدر و زیرفولدر)
 | # | مسیر فولدر | کاربرد |
 |---|---|---|
-| ۱ | `karavi/karavi.plans.prompt` | پرامپت‌ها، قوانین و پلن‌های تمامی ایجنت‌ها و دستیارها (Cursor/Claude/سایر) |
+| ۱ | `karavi/karavi.plans.prompt` | فقط پرامپت‌ها و پلن‌های تمامی ایجنت‌ها و دستیارها (Cursor/Claude/سایر) |
 | ۲ | `karavi/karavi.history` | تاریخچه تغییرات روزانه پروژه (`history.YYYY-MM-DD.md`) — هرگز حذف نمی‌شود |
 | ۳ | `karavi/karavi.deploy.config` | تنظیمات deploy و FTP این مخزن (هاست‌ها، پورت‌ها، سکرت‌های محلی) |
 | ۴ | `karavi/karavi.scripts.command` | دستورات اجرایی اپراتور و هوش مصنوعی (deploy، clean، history.write و...) |
@@ -52,6 +52,7 @@ folder trees, and safely cleans temporary data.
 | ۱۸ | `karavi/karavi.OnlineContent/SociaMediaContent` | محتواها، بنرها و پست‌های شبکه‌های اجتماعی |
 | ۱۹ | `karavi/karavi.OnlineContent/WordPressContent` | مقالات، صفحات و محتواهای سایت وردپرس |
 | ۲۰ | `karavi/karavi.OnlineContent/LinkedinConetnt` | مقالات و محتواهای تخصصی لینکدین |
+| ۲۱ | `karavi/karavi.Rules` | تنها منبع canonical و versioned همهٔ قوانین اختصاصی پروژه |
 
 ---
 
@@ -61,6 +62,7 @@ folder trees, and safely cleans temporary data.
 
 | نام قبلی در `karavi/` | مقصد استاندارد جدید |
 |---|---|
+| `rules`, `rule`, `project-rules`, `agent-rules`, `coding-rules`, `karavi.rules`, `karavi.project.rules` | `karavi.Rules` |
 | `plans`, `prompt`, `prompts`, `karavi.plans`, `karavi.prompt` | `karavi.plans.prompt` |
 | `history`, `histories`, `karavi.histories` | `karavi.history` |
 | `deploy`, `config`, `deploy.config`, `karavi.deploy` | `karavi.deploy.config` |
@@ -85,8 +87,8 @@ folder trees, and safely cleans temporary data.
 
 | دستور | اثر |
 |---|---|
-| `/karavi-folder init` | **مقداردهی اولیه کامل (۲۰ فولدر/زیرفولدر پیش‌فرض) + مهاجرت و تغییر نام فولدرهای قبلی** |
-| `/karavi-folder init --core` | مقداردهی اولیه فقط ۹ فولدر پایه + مهاجرت |
+| `/karavi-folder init` | **مقداردهی اولیه کامل (۲۱ فولدر/زیرفولدر پیش‌فرض) + مهاجرت و تغییر نام فولدرهای قبلی** |
+| `/karavi-folder init --core` | مقداردهی اولیه فقط ۱۰ فولدر پایه + مهاجرت |
 | `/karavi-folder create` | ساخت ساختار کامل و مهاجرت (همانند init) |
 | `/karavi-folder clean` | پاک‌سازی `karavi.temp.logs` و `karavi.temp.status` |
 | `/karavi-folder clean --deep` | پاک‌سازی کامل هر ۴ فولدر temp + کش‌ها + خروجی‌های سطح ریپو |
@@ -154,8 +156,24 @@ folder trees, and safely cleans temporary data.
 - **اگر فولدرهای قبلی در `karavi/` داشته باشم، محتوای آن‌ها پاک می‌شود؟**
   خیر! دستور `init` ساختار قبلی را شناسایی کرده و فایل‌ها را با حفظ کامل به فولدر استاندارد جدید انتقال می‌دهد.
 - **پیش‌فرض ساختار چند فولدر است؟**
-  پیش‌فرض ساختار **کامل (Full - ۱۸ فولدر)** است تا تمام نیازهای معماری، مستندات، موکاپ و تاریخچه پروژه پوشش داده شود.
+  پیش‌فرض ساختار **کامل (Full - ۲۱ فولدر)** است تا تمام نیازهای معماری، مستندات، موکاپ و تاریخچه پروژه پوشش داده شود.
 - **تفاوت `init` و `create` چیست؟**
   هر دو ساختار کامل را می‌سازند و مهاجرت را انجام می‌دهند؛ `init` نقطه ورود اصلی برای راه‌اندازی و بازسازی است.
 - **آیا اجرای دوباره `init` خطر دارد؟**
   خیر، کاملاً idempotent است و روی فولدرهای استاندارد موجود هیچ اثر منفی ندارد.
+
+## الزام محل نگهداری قوانین پروژه
+
+در هر اجرای `init` و `create`، حتی حالت Core با ۱۰ مسیر، ساخت `karavi/karavi.Rules`
+اجباری است. تمام قوانین اختصاصی agent، کدنویسی، معماری، workflow، تست، کیفیت،
+امنیت، resilience، observability، UI/UX، i18n، accessibility و قراردادها فقط در این
+مسیر canonical و versioned نگهداری می‌شوند. ایجاد rule جدید در مسیر پراکنده یا موقت
+ممنوع است. `karavi.plans.prompt` فقط محل prompt و plan است.
+
+فایل‌های `AGENTS.md`، `CLAUDE.md`، `GEMINI.md` و تنظیمات قوانین ابزارها فقط
+loader/integration هستند و باید به قوانین canonical ارجاع دهند. agent محتوای
+قوانین قبلی را با حفظ معنا به محل canonical منتقل می‌کند؛ اسکریپت به‌تنهایی این
+بازنویسی معنایی را انجام نمی‌دهد. collision بدون overwrite با `.legacy-*` حفظ و در
+گزارش نهایی ثبت می‌شود. اجرای دوباره نباید فایل یا rule تکراری بسازد.
+
+چک‌لیست اجباری و روال انتقال محتوا: [references/folders.md](references/folders.md).

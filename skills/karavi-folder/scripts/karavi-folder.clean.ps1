@@ -57,6 +57,7 @@ $k = Join-Path $repo 'karavi'
 
 # --- Preserve whitelist: these are NEVER removed ------------------------------
 $preservePatterns = @(
+    '*karavi.Rules*',
     '*karavi.history*', '*karavi.deploy.config*', '*karavi.plans.prompt*',
     '*karavi.scripts.command*', '*karavi.scripts.tools*', '*karavi.assets*',
     '*karavi.mockup*', '*karavi.doc*', '*karavi.BusinessModel.Doc*',

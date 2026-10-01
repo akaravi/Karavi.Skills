@@ -6,7 +6,7 @@ Pipeline / caretaker skill that initializes, migrates, and maintains the standar
 It performs two primary operations:
 
 1. **Initialize & Create main folders** (`init` / `create`) — Scaffold the canonical
-   `karavi/` tree (**Full by default: 20 folders & subfolders**) and automatically **detect, rename,
+   `karavi/` tree (**Full by default: 21 folders & subfolders**) and automatically **detect, rename,
    and migrate** any existing or legacy folders inside `karavi/` to the new standard.
 2. **Delete temporary info** (`clean`) — Remove temporary logs, status reports, build/deploy
    output, and stack caches while strictly preserving source, history, and configs.
@@ -17,11 +17,12 @@ It performs two primary operations:
 
 ---
 
-## Canonical Folders (Full Structure by Default — 20 Folders & Subfolders)
+## Canonical Folders (Full Structure by Default — 21 Folders & Subfolders)
 
 | Folder | Purpose |
 |---|---|
-| `karavi.plans.prompt` | Prompts, rules, and plans for all agents |
+| `karavi.Rules` | Sole canonical, versioned source of all project-specific rules |
+| `karavi.plans.prompt` | Prompts and plans only; never canonical project rules |
 | `karavi.history` | Daily change history (`history.YYYY-MM-DD.md`) |
 | `karavi.deploy.config` | Deploy & FTP configuration for this repository |
 | `karavi.scripts.command` | Operator/agent commands (deploy, run all, clean, ...) |
@@ -73,8 +74,8 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
 
 | Command | What it runs |
 |---|---|
-| `/karavi-folder init` | Full initialization (20 folders/subfolders) + migrate legacy folders (Default) |
-| `/karavi-folder init --core` | Core initialization (9 folders) + migrate legacy folders |
+| `/karavi-folder init` | Full initialization (21 folders/subfolders) + migrate legacy folders (Default) |
+| `/karavi-folder init --core` | Core initialization (10 folders) + migrate legacy folders |
 | `/karavi-folder create` | Full structure creation & migration (Default) |
 | `/karavi-folder clean` | Clear temp.logs + temp.status |
 | `/karavi-folder clean --deep` | Also clear temp.deploy + temp.build + stack caches |
@@ -114,3 +115,20 @@ and caches are deletable. It is idempotent and supports dry-run preview (`--what
 ## License
 
 Apache-2.0
+
+## Project rules are canonical and versioned
+
+`init` and `create` always create `karavi/karavi.Rules`, including Core (10 paths).
+All project rules and every new agent/development rule belong directly there:
+agent, coding, architecture, design, workflow, testing/quality/acceptance,
+security/resilience/observability, UI/UX/i18n/accessibility, contracts and constraints.
+Do not create scattered or temporary rule sources. `karavi.plans.prompt` is only
+for prompts and plans. Root `AGENTS.md`, `CLAUDE.md`, `GEMINI.md` and tool rule files
+are loaders/integrations referencing canonical policy, never independent sources.
+
+All seven aliases (`rules`, `rule`, `project-rules`, `agent-rules`, `coding-rules`,
+`karavi.rules`, `karavi.project.rules`) inside `karavi/` migrate to `karavi.Rules`.
+Collisions preserve existing files and move incoming content to unused `.legacy-*`
+names, listed in the final report. Repeated runs preserve file contents and do not
+duplicate rules. The agent must also consolidate rule content and verify loaders;
+see the mandatory [procedure and checklist](references/folders.md).

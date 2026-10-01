@@ -12,6 +12,7 @@ while **never touching source, config, history, or READMEs**.
 ## Safety rules (never violated)
 
 - **Preserve whitelist (never delete):**
+  - `karavi/karavi.Rules/` (canonical, versioned project rules and migration evidence)
   - `karavi/karavi.history/` (all `history.*.md`)
   - `karavi/karavi.deploy.config/` (and `karavi.scripts.command`, `karavi.scripts.tools`)
   - `karavi/karavi.plans.prompt/`, `karavi/karavi.assets/`, `karavi/karavi.mockup/`,

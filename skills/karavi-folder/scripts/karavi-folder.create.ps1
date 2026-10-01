@@ -6,12 +6,12 @@
   Creates the canonical karavi/ workspace folders in a repo root.
   Scans and migrates legacy/variant folder structures inside karavi/ by renaming
   and relocating them to standard names without data loss.
-  Default structure is Full (18 standard folders).
+  Default structure is Full (21 standard folders/subfolders).
 .PARAMETER RepoRoot
   Target repo root. Default: walk up from this script until a repo root
   (folder containing '.git' or 'karavi') is found.
 .PARAMETER Core
-  If specified, only scaffolds the 9 core folders instead of the default Full structure.
+  If specified, only scaffolds the 10 core folders instead of the default Full structure.
 .PARAMETER Full
   Explicitly enable Full structure (enabled by default).
 .PARAMETER NoMigrate
@@ -48,89 +48,4 @@ if (Test-Path -LiteralPath $initScript) {
     return
 }
 
-function Resolve-RepoRoot {
-    param([string]$Start = $PSScriptRoot)
-    $cur = (Resolve-Path $Start).Path
-    while ($cur -and (Test-Path -LiteralPath $cur)) {
-        if ((Test-Path -LiteralPath (Join-Path $cur '.git')) -or (Test-Path -LiteralPath (Join-Path $cur 'karavi'))) {
-            return $cur
-        }
-        $parent = Split-Path -Parent $cur
-        if ($parent -eq $cur -or [string]::IsNullOrEmpty($parent)) { break }
-        $cur = $parent
-    }
-    return (Get-Location).Path
-}
-
-if (-not $RepoRoot) {
-    $RepoRoot = Resolve-RepoRoot
-}
-if (-not (Test-Path -LiteralPath $RepoRoot)) {
-    throw "RepoRoot not found: $RepoRoot"
-}
-
-$repo = (Resolve-Path $RepoRoot).Path
-$k = Join-Path $repo 'karavi'
-
-if (-not (Test-Path -LiteralPath $k)) {
-    if ($WhatIf) { Write-Host "[WhatIf] Create dir: $k" }
-    else { New-Item -ItemType Directory -Force -Path $k | Out-Null }
-}
-
-$core = @(
-    'karavi.plans.prompt',
-    'karavi.history',
-    'karavi.deploy.config',
-    'karavi.scripts.command',
-    'karavi.scripts.tools',
-    'karavi.temp.logs',
-    'karavi.temp.status',
-    'karavi.temp.deploy',
-    'karavi.temp.build'
-)
-
-$optional = @(
-    'karavi.assets/brand',
-    'karavi.assets/icons',
-    'karavi.assets/screenshots',
-    'karavi.assets/templates',
-    'karavi.mockup',
-    'karavi.doc',
-    'karavi.BusinessModel.Doc',
-    'karavi.Customer.doc',
-    'karavi.OnlineContent/SociaMediaContent',
-    'karavi.OnlineContent/WordPressContent',
-    'karavi.OnlineContent/LinkedinConetnt'
-)
-
-$isFull = (-not $Core)
-
-$foldersToCreate = @($core)
-if ($isFull) {
-    $foldersToCreate += $optional
-}
-
-$created = 0
-foreach ($rel in $foldersToCreate) {
-    $target = Join-Path $k ($rel -replace '/', [IO.Path]::DirectorySeparatorChar)
-    $rootCheck = (Join-Path $repo '') -replace '\\$', ''
-    if (-not $target.StartsWith($rootCheck, [StringComparison]::OrdinalIgnoreCase)) {
-        throw "Refused: $target resolves outside repo root."
-    }
-    if (-not (Test-Path -LiteralPath $target)) {
-        if ($WhatIf) { Write-Host "[WhatIf] Create dir: $target" }
-        else {
-            New-Item -ItemType Directory -Force -Path $target | Out-Null
-            $gitkeepPath = Join-Path $target '.gitkeep'
-            if (-not (Test-Path -LiteralPath $gitkeepPath)) {
-                New-Item -ItemType File -Path $gitkeepPath -Force | Out-Null
-            }
-        }
-        $created++
-    }
-}
-
-Write-Host "karavi-folder create: $created folder(s) processed under $k (Scope: $(if ($isFull) { 'Full (Default)' } else { 'Core' }))"
-if (-not $WhatIf -and -not (Test-Path -LiteralPath (Join-Path $k '.gitkeep'))) {
-    Write-Host 'Next: add the "# --- karavi ---" block to .gitignore (see references/folders.md).'
-}
+throw "Required sibling karavi-folder.init.ps1 is missing; refusing partial initialization without migration."

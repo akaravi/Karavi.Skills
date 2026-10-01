@@ -1,29 +1,17 @@
 ---
 name: karavi-folder
 description: >
-  Initialize, scaffold, and maintain the standard `karavi/` workspace tree in a
-  repository, migrate/rename any legacy or existing folders to the canonical
-  structure, and safely remove temporary/interim data (logs, status, build/deploy
-  output, caches, temp scripts) while preserving source, config, history, and READMEs.
-  Default folder structure is Full (18 canonical folders).
-  A complete workspace caretaker skill: (1) initialize/create and migrate karavi
-  folders to the new Full standard, (2) delete temporary files like caches and logs.
-  TRIGGER when: user says "/karavi-folder", "/karavi-folder init", "karavi init",
-  "karavi folder", "مقداردهی اولیه karavi", "ایجاد و بازسازی karavi",
-  "ایجاد فولدرهای اصلی karavi", "ساختار karavi را بساز", "درست کردن پوشه karavi",
-  "تغییر ساختار فولدر karavi", "تغییر نام و انتقال فولدرهای karavi",
-  "مهاجرت به ساختار جدید karavi", "پاکسازی karavi", "حذف اطلاعات موقت",
-  "پاک کردن لاگ‌ها", "پاک کن کش", "clean karavi logs/cache", "clean karavi",
-  or asks for the karavi skeleton to be initialized, created, migrated, or tidied.
-  DO NOT TRIGGER when: the user wants stored long-term memory (use skill:karavi-memory)
-  or general (non-karavi) project scaffolding.
+  Use when initializing, creating, migrating, or cleaning the current repository's
+  karavi workspace (/karavi-folder init, create, clean). Full defaults to 21
+  canonical paths, including karavi/karavi.Rules as the versioned project-rule
+  source. Not for general scaffolding or long-term memory.
 license: Apache-2.0
 metadata:
   author: akaravi
-  version: "0.3.0"
+  version: "0.4.0"
   category: workspace-caretaker
   tags: "karavi, folder, init, scaffold, migration, cleanup, logs, cache, workspace, maintenance"
-compatibility: Cross-tool (Cursor, Claude Code, Antigravity, OpenCode, Codex, Cline). Idempotent. Migrates legacy paths safely. Deletes only gitignored/temp paths; never source.
+  compatibility: Cross-tool (Cursor, Claude Code, Antigravity, OpenCode, Codex, Cline). Idempotent. Migrates legacy paths safely. Deletes only gitignored/temp paths; never source.
 ---
 
 # karavi-folder
@@ -42,7 +30,7 @@ temporary data. Two primary operations:
 
 When the user requests `/karavi-folder init`, `/karavi-folder create`, or asks to set up/rebuild the `karavi/` workspace:
 
-1. **Default to the FULL structure (20 canonical folders/subfolders):**
+1. **Default to the FULL structure (21 canonical folders/subfolders):**
    Unless the user explicitly specifies `--core`, always scaffold all core and extended folders.
 2. **Detect & Migrate Existing/Legacy Folders:**
    Actively scan `karavi/` for any existing folders or legacy naming/locations (e.g. `doc`, `docs`, `prompts`, `plans`, `history`, `deploy`, `scripts`, `tools`, `logs`, `status`, `build`, `assets`, `mockup`, `business`, `customer`, `social`, `karavi.SociaMediaContent`, `OnlineContent`, etc.).
@@ -53,9 +41,33 @@ When the user requests `/karavi-folder init`, `/karavi-folder create`, or asks t
 
 ---
 
+## Mandatory project-rule ownership
+
+Every `init` and `create`, including `--core`, MUST create `karavi/karavi.Rules`.
+It is the **only canonical, versioned source** of all project-specific rules:
+agent behavior, coding, architecture and system design, workflow, testing,
+quality and acceptance gates, security, resilience, observability, UI/UX,
+i18n, accessibility, contracts, standards, and project constraints.
+Every new rule for agents or the development team MUST be written directly
+there. Scattered, temporary, or ad-hoc rule sources are prohibited.
+
+`karavi.plans.prompt` holds prompts and plans only, never project-rule authority.
+Root `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, and tool-specific rule files may remain
+only as loaders/integration entrypoints that reference and obey canonical rules;
+they MUST NOT define independent or contradictory project policy.
+
+For `init`/`create`, read and execute the **Project-rule consolidation** procedure
+and the entire verification checklist in [references/folders.md](references/folders.md).
+The scripts automate folders and named legacy migrations; the agent MUST inspect
+rule content, consolidate existing rules, repair loaders, and verify versioning.
+Script success alone does not complete this skill. Preserve canonical rules during
+cleanup. Repeating initialization must neither lose files nor duplicate rules.
+
+---
+
 ## Non-negotiable invariants
 
-- **Default is Full structure:** All 20 canonical folders/subfolders are scaffolded by default.
+- **Default is Full structure:** All 21 canonical folders/subfolders are scaffolded by default.
 - **Safe migration & renaming:** Existing folders and files under `karavi/` are detected, renamed, and migrated into the canonical structure without data loss.
 - **No cross-project import:** Create/clean **inside the current repo only**; never copy `karavi/` from another repository.
 - **Preserve whitelist:** Source code, config without secrets, `karavi.history/history.*.md`, and README files are never deleted.
@@ -70,11 +82,12 @@ When the user requests `/karavi-folder init`, `/karavi-folder create`, or asks t
 
 Scaffolds the canonical `karavi/` skeleton inside the repo root and migrates any existing legacy folders.
 
-### Canonical Folder Structure (Full — Default: 20 Folders & Subfolders)
+### Canonical Folder Structure (Full — Default: 21 Folders & Subfolders)
 
 | Folder | Purpose |
 |---|---|
-| `karavi.plans.prompt` | Prompts, reusable JSON rules, and Agent plans for all assistants |
+| `karavi.Rules` | Sole canonical, versioned source of all project-specific rules |
+| `karavi.plans.prompt` | Prompts and Agent plans only; never canonical project rules for all assistants |
 | `karavi.history` | Change history of the project (`history.YYYY-MM-DD.md`) |
 | `karavi.deploy.config` | Deploy & FTP configuration for this repo |
 | `karavi.scripts.command` | Operator/agent commands (deploy, run all, clean, history.write, ...) |
@@ -128,8 +141,8 @@ Persian: `/karavi-folder شروع` یا `/karavi-folder ایجاد و بازسا
 
 | Command | What it runs |
 |---|---|
-| `/karavi-folder init` | **Section 1 — Full initialization (18 folders) + migrate legacy folders** (Default) |
-| `/karavi-folder init --core` | Section 1 — Core initialization (9 folders) + migrate legacy folders |
+| `/karavi-folder init` | **Section 1 — Full initialization (21 folders/subfolders) + migrate legacy folders** (Default) |
+| `/karavi-folder init --core` | Section 1 — Core initialization (10 folders) + migrate legacy folders |
 | `/karavi-folder create` | Section 1 — Full structure creation & migration (Default) |
 | `/karavi-folder create --core` | Section 1 — Core skeleton only |
 | `/karavi-folder clean` | Section 2 — Clear temp.logs + temp.status |

@@ -6,12 +6,12 @@
   Scaffolds the canonical karavi/ workspace tree in a repo root.
   Scans and migrates existing legacy/variant folder structures inside karavi/
   by renaming and relocating them to the new standard paths without data loss.
-  Default structure is Full (20 standard folders/subfolders).
+  Default structure is Full (21 standard folders/subfolders).
 .PARAMETER RepoRoot
   Target repo root. Default: walk up from this script until a folder containing
   '.git' or 'karavi' is found.
 .PARAMETER Core
-  If specified, only scaffolds the 9 core folders instead of the default Full structure.
+  If specified, only scaffolds the 10 core folders instead of the default Full structure.
 .PARAMETER NoMigrate
   Skip legacy folder migration/renaming.
 .PARAMETER WhatIf
@@ -56,6 +56,39 @@ if (-not (Test-Path -LiteralPath $RepoRoot)) {
 
 $repo = (Resolve-Path $RepoRoot).Path
 $k = Join-Path $repo 'karavi'
+$collisions = [Collections.Generic.List[string]]::new()
+
+function Assert-WorkspacePath {
+    param([string]$Path)
+    $absolute = [IO.Path]::GetFullPath($Path)
+    $boundary = $repo.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+    if (-not $absolute.StartsWith($boundary, [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refused: path outside repo root: $Path"
+    }
+    $cursor = $absolute
+    while ($cursor -and $cursor -ne $repo) {
+        if (Test-Path -LiteralPath $cursor) {
+            $entry = Get-Item -LiteralPath $cursor -Force
+            if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+                throw "Refused: linked workspace path: $cursor"
+            }
+        }
+        $cursor = Split-Path $cursor -Parent
+    }
+}
+
+# Validate existing paths before moving a tree; never traverse a junction or link.
+Assert-WorkspacePath $k
+function Assert-WorkspaceTree {
+    param([string]$Path)
+    Assert-WorkspacePath $Path
+    if (Test-Path -LiteralPath $Path -PathType Container) {
+        foreach ($entry in Get-ChildItem -LiteralPath $Path -Force) {
+            Assert-WorkspaceTree $entry.FullName
+        }
+    }
+}
+if (Test-Path -LiteralPath $k) { Assert-WorkspaceTree $k }
 
 if (-not (Test-Path -LiteralPath $k)) {
     if ($WhatIf) {
@@ -68,6 +101,7 @@ if (-not (Test-Path -LiteralPath $k)) {
 
 # --- Canonical Structure (Full is Default) ------------------------------------
 $coreFolders = @(
+    'karavi.Rules',
     'karavi.plans.prompt',
     'karavi.history',
     'karavi.deploy.config',
@@ -96,6 +130,13 @@ $optionalFolders = @(
 # --- Legacy Folder Migration Mapping -------------------------------------------
 # Maps legacy folder names inside karavi/ to their new canonical relative path
 $migrationMap = [ordered]@{
+    'rules'                      = 'karavi.Rules'
+    'rule'                       = 'karavi.Rules'
+    'project-rules'              = 'karavi.Rules'
+    'agent-rules'                = 'karavi.Rules'
+    'coding-rules'               = 'karavi.Rules'
+    'karavi.rules'               = 'karavi.Rules'
+    'karavi.project.rules'        = 'karavi.Rules'
     'plans'                      = 'karavi.plans.prompt'
     'prompt'                     = 'karavi.plans.prompt'
     'prompts'                    = 'karavi.plans.prompt'
@@ -237,7 +278,7 @@ function Invoke-Migration {
     }
 
     # 4. Check all direct children of karavi/ against migration map
-    $children = Get-ChildItem -LiteralPath $k -Directory -ErrorAction SilentlyContinue
+    $children = Get-ChildItem -LiteralPath $k -Directory -Force
     foreach ($child in $children) {
         $name = $child.Name
         if ($migrationMap.Contains($name)) {
@@ -245,7 +286,20 @@ function Invoke-Migration {
             $targetPath = Join-Path $k ($targetRel -replace '/', [IO.Path]::DirectorySeparatorChar)
             
             # If the legacy folder name is not already identical to the target folder
-            if ($child.FullName -ne $targetPath -and (Test-Path -LiteralPath $child.FullName)) {
+            $targetName = Split-Path $targetPath -Leaf
+            if ($child.FullName -ieq $targetPath -and $child.FullName -cne $targetPath -and
+                -not @(Get-ChildItem -LiteralPath $k -Directory -Force | Where-Object Name -CEQ $targetName).Count) {
+                # Case-only alias on case-insensitive filesystems: use an unused intermediate.
+                $intermediate = Join-Path $k ('karavi-rules-case-' + [guid]::NewGuid().ToString('N'))
+                Assert-WorkspacePath $intermediate
+                if ($WhatIf) {
+                    Write-Host "[WhatIf] Normalize folder case: $($child.FullName) -> $targetPath"
+                } else {
+                    Move-Item -LiteralPath $child.FullName -Destination $intermediate
+                    Move-Item -LiteralPath $intermediate -Destination $targetPath
+                }
+                $migrated++
+            } elseif ($child.FullName -cne $targetPath -and (Test-Path -LiteralPath $child.FullName)) {
                 $migrated += Move-DirectoryContent -Source $child.FullName -Destination $targetPath
             }
         }
@@ -260,6 +314,12 @@ function Move-DirectoryContent {
         [string]$Destination
     )
     if (-not (Test-Path -LiteralPath $Source)) { return 0 }
+    Assert-WorkspacePath $Source
+    Assert-WorkspacePath $Destination
+    if (-not (Test-Path -LiteralPath $Source -PathType Container)) { throw "Expected directory: $Source" }
+    if ((Test-Path -LiteralPath $Destination) -and -not (Test-Path -LiteralPath $Destination -PathType Container)) {
+        throw "Canonical directory is occupied by a file: $Destination"
+    }
     $count = 0
 
     if (-not (Test-Path -LiteralPath $Destination)) {
@@ -271,36 +331,38 @@ function Move-DirectoryContent {
             if (-not (Test-Path -LiteralPath $destParent)) {
                 New-Item -ItemType Directory -Force -Path $destParent | Out-Null
             }
-            Move-Item -LiteralPath $Source -Destination $Destination -Force
+            Move-Item -LiteralPath $Source -Destination $Destination
             Write-Host "[Migrated] Renamed/Moved folder: $Source -> $Destination"
         }
         return 1
     }
 
     # Destination already exists: move contents safely
-    $items = Get-ChildItem -LiteralPath $Source -Force -ErrorAction SilentlyContinue
+    $items = Get-ChildItem -LiteralPath $Source -Force
     foreach ($item in $items) {
         $destItemPath = Join-Path $Destination $item.Name
+        Assert-WorkspacePath $item.FullName
+        Assert-WorkspacePath $destItemPath
+        if (Test-Path -LiteralPath $destItemPath) {
+            if ($item.PSIsContainer -and (Test-Path -LiteralPath $destItemPath -PathType Container)) {
+                $count += Move-DirectoryContent -Source $item.FullName -Destination $destItemPath
+                continue
+            }
+            $index = 1
+            do {
+                $backupName = "$($item.BaseName).legacy-$index$($item.Extension)"
+                $destItemPath = Join-Path $Destination $backupName
+                $index++
+            } while (Test-Path -LiteralPath $destItemPath)
+            $collisions.Add("$($item.FullName) -> $destItemPath")
+        }
         if ($WhatIf) {
             Write-Host "[WhatIf] Move content: $($item.FullName) -> $destItemPath"
             $count++
         } else {
-            if (-not (Test-Path -LiteralPath $destItemPath)) {
-                Move-Item -LiteralPath $item.FullName -Destination $destItemPath -Force
-                Write-Host "[Migrated] Moved: $($item.FullName) -> $destItemPath"
-                $count++
-            } else {
-                # Collision: merge if directory, rename if file
-                if ($item.PSIsContainer) {
-                    $count += Move-DirectoryContent -Source $item.FullName -Destination $destItemPath
-                } else {
-                    $backupName = "$($item.BaseName).legacy-$([Guid]::NewGuid().ToString('N').Substring(0,6))$($item.Extension)"
-                    $altDest = Join-Path $Destination $backupName
-                    Move-Item -LiteralPath $item.FullName -Destination $altDest -Force
-                    Write-Host "[Migrated] Collision resolved (renamed): $($item.FullName) -> $altDest"
-                    $count++
-                }
-            }
+            Move-Item -LiteralPath $item.FullName -Destination $destItemPath
+            Write-Host "[Migrated] Moved: $($item.FullName) -> $destItemPath"
+            $count++
         }
     }
 
@@ -331,6 +393,10 @@ if (-not $Core) {
 $createdCount = 0
 foreach ($rel in $foldersToCreate) {
     $target = Join-Path $k ($rel -replace '/', [IO.Path]::DirectorySeparatorChar)
+    Assert-WorkspacePath $target
+    if ((Test-Path -LiteralPath $target) -and -not (Test-Path -LiteralPath $target -PathType Container)) {
+        throw "Canonical directory is occupied by a file: $target"
+    }
     $rootCheck = (Join-Path $repo '') -replace '\\$', ''
     if (-not $target.StartsWith($rootCheck, [StringComparison]::OrdinalIgnoreCase)) {
         throw "Refused: $target resolves outside repo root."
@@ -348,10 +414,16 @@ foreach ($rel in $foldersToCreate) {
         }
         $createdCount++
     }
+    if ((Test-Path -LiteralPath $target -PathType Container) -and
+        -not @(Get-ChildItem -LiteralPath $target -Force).Count) {
+        if ($WhatIf) { Write-Host "[WhatIf] Create sentinel: $target/.gitkeep" }
+        else { New-Item -ItemType File -Path (Join-Path $target '.gitkeep') | Out-Null }
+    }
 }
 
 # --- Step 3: Wire .gitignore if needed ---------------------------------------
 $gitignorePath = Join-Path $repo '.gitignore'
+Assert-WorkspacePath $gitignorePath
 $gitignoreBlock = @"
 
 # --- karavi ---
@@ -365,19 +437,25 @@ karavi/karavi.deploy.config/deploy.secrets.json
 "@
 
 if (Test-Path -LiteralPath $gitignorePath) {
-    $giContent = Get-Content -LiteralPath $gitignorePath -Raw -ErrorAction SilentlyContinue
+    $giContent = [IO.File]::ReadAllText($gitignorePath)
     if ($giContent -notmatch 'karavi/karavi\.temp\.logs') {
         if ($WhatIf) {
             Write-Host "[WhatIf] Append '# --- karavi ---' block to .gitignore"
         } else {
-            Add-Content -LiteralPath $gitignorePath -Value $gitignoreBlock -Encoding UTF8
+            [IO.File]::WriteAllText($gitignorePath, $giContent + $gitignoreBlock, [Text.UTF8Encoding]::new($false))
             Write-Host "Updated .gitignore with karavi rules."
         }
     }
+} elseif ($WhatIf) {
+    Write-Host "[WhatIf] Create .gitignore with '# --- karavi ---' block"
+} else {
+    [IO.File]::WriteAllText($gitignorePath, $gitignoreBlock, [Text.UTF8Encoding]::new($false))
 }
 
-Write-Host "karavi-folder init completed successfully."
-Write-Host "Mode: $(if ($Core) { 'Core (9 folders)' } else { 'Full (20 folders/subfolders - Default)' })"
+Write-Host "karavi-folder filesystem $(if ($WhatIf) { 'preview' } else { 'initialization' }) completed; agent rule-content verification is still required."
+Write-Host "Mode: $(if ($Core) { 'Core (10 folders)' } else { 'Full (21 folders/subfolders - Default)' })"
 Write-Host "Migrated/Relocated items: $migratedCount"
 Write-Host "Created folders: $createdCount"
+Write-Host "Collisions: $($collisions.Count)"
+foreach ($collision in $collisions) { Write-Host "[Collision] $collision" }
 Write-Host "Root: $k"
