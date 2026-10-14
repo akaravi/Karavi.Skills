@@ -8,13 +8,16 @@
 
 ## پوشش
 
+- Karavi به‌عنوان ورودی کاربر و orchestrator اصلی
+- زنجیرهٔ `Karavi → judge-verdict → هفت expert`
 - بررسی scope و acceptance criteria
-- relevance mask واحد برای هر هفت حوزهٔ 7Expert
+- هفت expert مستقل، هرکدام برای یک حوزهٔ مشخص، زیر نظر Judge
+- relevance mask واحد از fan-in هفت expert مستقل
 - ارزیابی evidence، security، parity، contract، tests و budget
 - بررسی failure scenario برای profileهای standard و critical
 - طبقه‌بندی findingها با severity، confidence، impact و verify method
 - تفکیک warning، degraded، block و fail
-- ثبت اختلاف Agent Main، 7Expert، Customer و subagent بدون حل بی‌صدا
+- ثبت اختلاف Agent Main، هفت expert، Customer و subagent بدون حل بی‌صدا
 - Completion Envelope شامل Check 1، Check 2، Check 3 و JudgeVerdict
 - verdict نهایی `accept|block|fail`
 - route کردن improvement و new-scope بدون اجرای خودکار آن‌ها
@@ -56,6 +59,32 @@ migration، release candidate یا خروجی چند agent باید قبل از 
 
 فقط حوزه‌های `relevant` تحلیل عمیق و `verifyMethod` تولید می‌کنند؛ حوزه‌های
 `not-relevant` با دلیل کوتاه ثبت می‌شوند.
+
+### roster اجباری expertها
+
+هر حوزه یک Bot مستقل دارد و همه زیر نظر `judge-verdict` کار می‌کنند؛ خود
+`judge-verdict` نیز زیرمجموعهٔ `Karavi` است:
+
+| Bot | حوزه |
+|---|---|
+| `judge-management-business` | Management & Business |
+| `judge-ux-ui` | UX/UI |
+| `judge-frontend` | Frontend |
+| `judge-backend-architecture` | Backend & Architecture |
+| `judge-infrastructure-security` | Infrastructure & Security |
+| `judge-quality-testing` | Quality & Testing |
+| `judge-content-seo` | Content & SEO |
+
+`judge-verdict` تنها Bot مجاز به صدور `accept|block|fail` است. Bot تجمیعی
+`judge-7expert` معتبر نیست و نباید به‌جای هفت expert استفاده شود.
+
+ورودی کاربر باید به Bot `Karavi` داده شود. Karavi یک packet واحد به
+`judge-verdict` می‌دهد؛ Judge آن را بین هفت Expert توزیع می‌کند، موضع هرکدام را
+(`approve|reject|abstain|degraded`) جمع می‌کند، رأی‌ها را مقایسه می‌کند و فقط
+سپس verdict نهایی را به Karavi برمی‌گرداند.
+
+Judge باید scope و evidence یکسان را مستقل برای هر هفت Bot ارسال کند، خروجی‌ها
+را fan-in کند، missing/degraded را صریح ثبت کند و سپس verdict واحد صادر کند.
 
 ## معیار Block
 

@@ -1,0 +1,32 @@
+# Tooling & Node
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.env
+.env.*
+__omp_shell(".env.example")
+*.log
+.cache/
+.idea/
+.vscode/
+Thumbs.db
+[Dd]esktop.ini
+.DS_Store
+
+# Graphify local knowledge graph
+graphify-out/
+**/graphify-out/
+
+# --- karavi ---
+karavi/karavi.temp.logs/
+karavi/karavi.temp.status/
+karavi/karavi.temp.deploy/
+karavi/karavi.temp.build/
+karavi/karavi.deploy.config/Deploy_FTP.info
+karavi/karavi.deploy.config/Deploy_TestUsers.info
+karavi/karavi.deploy.config/deploy.secrets.json
+.omp/
+.freebuff/

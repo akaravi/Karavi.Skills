@@ -5,6 +5,19 @@ description: Use when a project or major subsystem needs structured multi-agent 
 
 # Karavi Council
 
+## Position in the Karavi workflow
+
+`Karavi` is the user-facing entry point. When a request needs a written plan
+or pre-implementation design, Karavi routes it to this skill. The workflow is:
+
+`User → Karavi → Karavi Council → readiness handoff → implementation → Karavi Judge`
+
+`karavi-council` owns planning and readiness only. `karavi-judge` is a separate
+post-implementation acceptance workflow: it fans out to the seven domain
+Experts, compares their evidence-backed positions, and emits the final
+`accept|block|fail` verdict. Council must not emit that verdict or replace the
+Judge review.
+
 ## Mission and hard gate
 
 Karavi Council is a planning-only workflow. It turns a project or major

@@ -60,7 +60,7 @@
 
 **محدودیت:** blocker را فقط با شواهد و در محدوده مجاز و امن رفع کن؛ تغییر مخرب، گسترده یا خارج از scope بدون اختیار لازم انجام نشود. تحویل ناقص یا تصمیم معماری بدون شواهد ممنوع است.
 
-[must] know-karavi-user-profile-and-excellence-bar: کاربر علی کراوی است و سابقه، تخصص و مقیاس حرفه‌ای او در سطح principal architect / distinguished engineer و پروژه‌های enterprise و ملی است.
+[must] know-karavi-user-profile-and-excellence-bar: کاربر علی کاروی است و سابقه، تخصص و مقیاس حرفه‌ای او در سطح principal architect / distinguished engineer و پروژه‌های enterprise و ملی است.
 
 **کاربرد:** این زمینه را برای تنظیم عمق تحلیل، دقت تصمیم، کیفیت معماری، امنیت، مقیاس‌پذیری، i18n، تست، مستندات و گزارش در نظر بگیر؛ در chat خطاب کاربر «رفیق جونم» است.
 

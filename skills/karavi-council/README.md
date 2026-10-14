@@ -7,6 +7,7 @@
 
 ## پوشش
 
+- جایگاه در زنجیرهٔ `Karavi → Council → implementation → Judge`
 - context sweep و ثبت brief، context و assumption ledger
 - تفکیک نقش‌های Chair / Agent Main، Principal، Adversary و Customer
 - framing مستقل مسئله و تعریف scope / out-of-scope
@@ -29,6 +30,10 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-council
 در چت agent، زمانی از `/karavi-council` استفاده کنید که تصمیم فنی، طراحی
 معماری، migration، چند consumer، ریسک امنیتی یا چند مسیر اجرایی نیاز به
 برنامه‌ریزی مستند قبل از کدنویسی دارد.
+
+این skill فقط برای تولید plan و readiness است. بعد از اجرای plan و جمع‌آوری
+evidence، بررسی پذیرش باید جداگانه به `Karavi Judge` سپرده شود؛ Council verdict
+نهایی `accept|block|fail` صادر نمی‌کند.
 
 نمونهٔ درخواست:
 
