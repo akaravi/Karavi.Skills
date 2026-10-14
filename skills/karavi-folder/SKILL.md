@@ -39,6 +39,26 @@ When the user requests `/karavi-folder init`, `/karavi-folder create`, or asks t
 4. **Wire Gitignore & Gitkeep:**
    Ensure `.gitignore` contains the `# --- karavi ---` block and sentinel `.gitkeep` files exist in empty/temp folders.
 
+5. **Enforce canonical artifact placement for every agent:**
+   Before creating, downloading, or moving any file, classify its purpose and resolve it
+   to the canonical path in `references/folders.md`. Agents **MUST** write project
+   documentation, plans, prompts, rules, history, reports, logs, screenshots, mockups,
+   online content, scripts, tooling, deploy configuration, and temporary output under
+   `karavi/` only. An agent **MUST NOT** create a file of one of those kinds at the
+   repository root or another non-`karavi/` directory. If such a file already exists,
+   migrate it into the matching canonical folder without overwriting or deleting data.
+6. **Reject ambiguous destinations instead of inventing a new folder:**
+   If an artifact matches no canonical category, keep it out of `karavi/` only when it
+   is an application source file, required runtime/build configuration, dependency
+   metadata, or a tool-required integration loader. Otherwise stop the write, report
+   the proposed filename and category, and use the closest documented canonical folder
+   after resolving the classification. Never create an ad-hoc `docs`, `plans`,
+   `reports`, `artifacts`, `notes`, or similar project folder outside `karavi/`.
+
+The placement contract is mandatory for **all** agents and tools, not only the agent
+running `/karavi-folder`. Read the complete ownership matrix in
+[references/folders.md](references/folders.md) before writing artifacts.
+
 ---
 
 ## Mandatory project-rule ownership

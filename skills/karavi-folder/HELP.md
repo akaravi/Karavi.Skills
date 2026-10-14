@@ -54,6 +54,29 @@ folder trees, and safely cleans temporary data.
 | ۲۰ | `karavi/karavi.OnlineContent/LinkedinConetnt` | مقالات و محتواهای تخصصی لینکدین |
 | ۲۱ | `karavi/karavi.Rules` | تنها منبع canonical و versioned همهٔ قوانین اختصاصی پروژه |
 
+
+### الزام محل نگهداری همهٔ artifactها برای تمام agentها
+
+این قرارداد برای تمام agentها، subagentها، scriptها و toolها اجباری است؛ فقط اجرای
+`karavi-folder` مشمول آن نیست. هر فایل باید قبل از ایجاد بر اساس کاربردش طبقه‌بندی
+و در مسیر canonical متناظر زیر `karavi/` ذخیره شود:
+
+- مستندات فنی، معماری و راهنماها → `karavi/karavi.doc`
+- plan و prompt → `karavi/karavi.plans.prompt`
+- rule و policy → `karavi/karavi.Rules`
+- گزارش وضعیت و log → `karavi/karavi.temp.status` و `karavi/karavi.temp.logs`
+- تاریخچه → `karavi/karavi.history`
+- اسکریپت و ابزار → `karavi/karavi.scripts.command` و `karavi/karavi.scripts.tools`
+- business، customer، online content، asset و mockup → فولدر canonical متناظر
+
+ایجاد مستندات یا فایل‌های مشابه در root یا فولدرهای پراکنده مانند `docs/`،
+`plans/`، `reports/`، `notes/`، `artifacts/` و `publish/` ممنوع است. فایل‌های
+موجود باید با حفظ collision به محل canonical منتقل شوند. فقط source code،
+manifest/lockfile، تنظیمات ضروری runtime/build و loaderهای اجباری ابزارها می‌توانند
+خارج از `karavi/` باشند؛ loader نباید policy مستقل داشته باشد. اگر مقصد روشن نیست،
+agent نباید فولدر جدید اختراع یا فایل ایجاد کند و باید طبقه‌بندی را گزارش کند.
+
+ماتریس کامل مالکیت مسیر در [references/folders.md](references/folders.md) است.
 ---
 
 ## ۳) مهاجرت خودکار ساختارهای قبلی (Migration)

@@ -40,6 +40,20 @@ It performs two primary operations:
 | `karavi.OnlineContent/WordPressContent` | WordPress posts, pages, and website content |
 | `karavi.OnlineContent/LinkedinConetnt` | LinkedIn articles, posts, and professional networking content |
 
+
+## Mandatory artifact placement
+
+All agents and tools MUST store project artifacts in their matching canonical
+`karavi/` folder. Documentation, plans, prompts, reports, notes, rules, history,
+logs, screenshots, mockups, scripts, tooling, deploy configuration, online content,
+and generated output MUST NOT be created at the repository root or in ad-hoc folders
+such as `docs/`, `plans/`, `reports/`, `artifacts/`, or `publish/`.
+
+Permitted outside-`karavi/` files are limited to application source, dependency
+manifests/lockfiles, required runtime/build configuration, and root tool integration
+loaders that only reference `karavi/karavi.Rules`. When classification is ambiguous,
+do not invent a destination; use the ownership matrix in
+[`references/folders.md`](./references/folders.md).
 ---
 
 ## Legacy Folder Migration

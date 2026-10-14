@@ -14,6 +14,46 @@ planning, technical & business documentation, history, scripts, tools, logs, sta
 2. **Automatic Migration & Renaming:** If the repository already contains folders under `karavi/` with legacy or variant names, they are **automatically detected, renamed, and relocated** into the new standard structure without deleting or losing any files.
 3. **Local to Current Repo:** Freshly scaffolded inside the current repository root. Never imports from or copies another project.
 
+### Mandatory agent artifact-placement contract
+
+This contract applies to every agent, subagent, script, and tool operating in the
+repository. `karavi/` is the ownership boundary for project artifacts. Before a
+write, the agent MUST classify the artifact and use the first matching canonical
+destination below:
+
+| Artifact purpose | REQUIRED destination | Examples |
+|---|---|---|
+| Project rules and agent/development policy | `karavi/karavi.Rules` | rules, guardrails, acceptance policy |
+| Plans and prompts | `karavi/karavi.plans.prompt` | plans, briefs, prompt files |
+| Technical, architecture, operator documentation | `karavi/karavi.doc` | ADRs, specifications, runbooks, manuals |
+| Business documentation | `karavi/karavi.BusinessModel.Doc` | business model, pricing, commercial requirements |
+| Customer documentation | `karavi/karavi.Customer.doc` | personas, research, feedback, pre-execution notes |
+| Social, WordPress, or LinkedIn content | Matching `karavi/karavi.OnlineContent/*` folder | Posts, articles, campaign content |
+| Project history | `karavi/karavi.history` | `history.YYYY-MM-DD.md` |
+| Deploy configuration | `karavi/karavi.deploy.config` | deploy targets, local ports, credentials files |
+| Agent/operator commands | `karavi/karavi.scripts.command` | command entry points |
+| Tooling and validators | `karavi/karavi.scripts.tools` | path resolvers, verification helpers |
+| Logs and status reports | `karavi/karavi.temp.logs` or `karavi/karavi.temp.status` | captured output, run reports |
+| Build and deploy staging output | `karavi/karavi.temp.build` or `karavi/karavi.temp.deploy` | generated packages, release staging |
+| Images, screenshots, templates, mockups | Matching `karavi/karavi.assets/*` or `karavi/karavi.mockup` | screenshots, logos, UI references |
+
+Accordingly, agents MUST NOT create project documentation or equivalent artifacts in
+root `docs/`, `plans/`, `reports/`, `notes/`, `artifacts/`, `publish/`, or any other
+ad-hoc directory outside `karavi/`. The same prohibition applies to files placed
+directly at repository root. Existing misplaced artifacts MUST be migrated during
+`init`/`create` with collision preservation.
+
+Only these deliberate exceptions may remain outside `karavi/`: application source
+code, dependency manifests and lockfiles, required runtime/build configuration,
+and tool-required integration loaders such as root `AGENTS.md`, `CLAUDE.md`,
+`GEMINI.md`, or equivalent files that only reference canonical rules. These
+exceptions MUST NOT be used to store project documentation, plans, reports, or
+independent policy.
+
+If no canonical destination is clear, the agent MUST NOT invent a folder or write
+the file. It must classify the artifact against this matrix, choose the closest
+documented destination, or report the unresolved classification.
+
 ---
 
 ## Canonical Folder Structure (Full — Default: 21 Folders & Subfolders)
@@ -129,6 +169,9 @@ karavi/karavi.deploy.config/deploy.secrets.json
 - [ ] Existing history, documentation, prompts, and configs have been migrated intact.
 - [ ] `.gitignore` contains the `# --- karavi ---` block.
 - [ ] `git status` is clean of temporary/generated files under `karavi/`.
+- [ ] Every agent-created project artifact is inside its matching canonical `karavi/` folder.
+- [ ] No project documentation, plan, prompt, report, note, artifact, or independent rule source exists outside `karavi/`.
+- [ ] Any permitted root integration file is only a loader/reference and contains no independent project policy.
 
 ## Project-rule consolidation (mandatory agent procedure)
 
