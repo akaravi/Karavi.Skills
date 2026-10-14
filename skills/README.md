@@ -14,6 +14,7 @@ they install with `npx skills add`, so treat every file here as a public API.
 | [`karavi-council`](./karavi-council/) | Planning / architecture | Technical council for context sweep, options, red-team, ADR, specification, plan, and readiness before execution. |
 | [`karavi-judge`](./karavi-judge/) | Quality / acceptance | Independent evidence-based acceptance gate: seven-domain relevance mask, failure scenario, Completion Envelope, and the final verdict. |
 | [`karavi-rule`](./karavi-rule/) | Global rule router | Activates the canonical rule source, installs the mandatory workflow skills, and routes work to the skill that owns each procedure. |
+| [`karavi-deploy-github-plesk`](./karavi-deploy-github-plesk/) | Deployment / CI-CD | Automates exact-tag GitHub Actions releases into a Plesk domain with branch, path, webhook, and smoke verification. |
 
 ## Choosing a Skill
 
@@ -23,6 +24,7 @@ they install with `npx skills add`, so treat every file here as a public API.
 - **Need to clear temp logs / caches / build artifacts?** → `/karavi-folder clean`
 - **Architecture, ADR, or consequential planning?** → `/karavi-council`
 - **Final acceptance of a delivery?** → `/karavi-judge`
+- **GitHub Actions to Plesk deployment?** → `/karavi-deploy-github-plesk`
 - **Activate the global rules and install the mandatory skills?** → `/karavi-rule`
 
 Ordering when several apply: arm the prompt first (`karavi-prompt`), then plan
