@@ -37,6 +37,7 @@ This matrix contains every rule identifier in the complete canonical corpus. Eve
 | finglish-definition | karavi-rule | Read the canonical rule reference when its trigger matches; record applicable evidence. |
 | follow-project-patterns | karavi-rule | Read the canonical rule reference when its trigger matches; record applicable evidence. |
 | ftp-deploy-command-only | karavi-rule | Read the canonical rule reference when its trigger matches; record applicable evidence. |
+| git-ntk-ssh-only | karavi-rule | Trigger: any Git repository connection to git.ntk.ir. MUST use SSH scp-style `git@git.ntk.ir:<namespace>/<repository>.git`; HTTP(S) Git repository URLs are prohibited; GitLab HTTPS APIs/Web UI/webhooks are unaffected. Evidence: applicable clone commands and remote/submodule/CI repository URLs; verifyMethod: inspect every applicable URL for the SSH scp-style form and confirm independent Git/Deploy authorization remains unchanged. |
 | git-safety | karavi-rule | Read the canonical rule reference when its trigger matches; record applicable evidence. |
 | global-version-abcd | karavi-rule | Read the canonical rule reference when its trigger matches; record applicable evidence. |
 | i18n-base-locale-fa | karavi-rule | Read the canonical rule reference when its trigger matches; record applicable evidence. |

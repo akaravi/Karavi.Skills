@@ -1,7 +1,7 @@
 ---
 name: karavi-deploy-gitlab-plesk
 description: Use when automating GitLab-to-Plesk deployment via GitLab CI/CD, Docker runners, direct branch pushes, and Plesk Webhooks without zip files.
-version: 1.0.0
+version: 1.1.0
 author: Ali Karavi (akaravi), Hermes Agent
 license: Apache-2.0
 platforms: [linux, macos, windows]
@@ -21,13 +21,33 @@ Use this skill to build an automated, repeatable, and fast GitLab CI/CD to Plesk
 - Migrating existing GitHub Actions / FTP deployments to a private, self-hosted GitLab + Plesk infrastructure.
 - Setting up direct Git-branch continuous deployment where Plesk automatically pulls upon webhook triggers without intermediate `.zip` artifacts.
 
+## Binding Agent Prompt: Publish Pipeline
+
+When generating, editing, or reviewing `.gitlab-ci.yml`, apply this contract before the deployment procedure. Read [workflow-contract.md](references/workflow-contract.md) for the rules, health probe example, and acceptance scenarios.
+
+**Objective:** Produce a publish-tag pipeline with exactly `test -> build -> health`, preserving the project's application commands and deployment targets.
+
+| Requirement | Binding instruction |
+|---|---|
+| Trigger | Create this release pipeline only when `$CI_COMMIT_TAG == "publish"`. `publish` means the exact Git tag, not a runner tag, branch, job name, or commit-message keyword. Reject branch pushes, other tags, MR, schedule, web, and API pipeline sources. |
+| Stages | Declare exactly `test`, `build`, `health`, in that order. Migrate former `publish` jobs into `build` and former `health_check` jobs into `health`; do not add extra stages. |
+| Test gate | Run every project-required test before any build/deployment starts. No `allow_failure`, manual gates, or dependency shortcuts that bypass required tests. |
+| Build gate | Compile, clean the payload, push to the dedicated Plesk branch, and require webhook HTTP 204 inside `build`. Every build/deployment must succeed before `health` starts. |
+| Health gate | For every deployed API, use configured canonical URLs to GET both Health and Swagger. Require HTTP 200, the project's healthy response contract, a working Swagger UI, and a valid OpenAPI/Swagger JSON document. Root-page 200 or webhook 204 alone is not success. |
+| Failure | Use bounded readiness retries, connection/request timeouts, and verified TLS. Missing configuration, exhausted retries, unhealthy payloads, and invalid Swagger fail the job and pipeline. Do not use `allow_failure`, `when: always`, `curl -k`, or `|| true` to hide failures. |
+| Evidence | Record the tag/source, stage graph, required job outcomes, and redacted per-target probe outcomes; never record credentials, webhook query strings, or raw response bodies. |
+
+**Execution boundary:** This skill update or a request to generate CI is not permission to create/move the `publish` tag, push, trigger a pipeline, or Deploy. Obtain the independently required authorization before side effects.
+
+**Output contract:** Return the changed CI paths, discovered test/build commands, target-to-probe mapping, validation results, and unresolved prerequisites. Do not claim release success until all required probes pass. Do not invent URLs or relax production authentication to make Swagger pass.
+
 ## Prerequisites
 
 1. **GitLab Project:** Project repository on GitLab (e.g. `git.ntk.ir/<group>/<project>`).
 2. **GitLab Runner:** A runner registered with `executor = "docker"` and capable of pulling required images (.NET SDK, Node.js).
 3. **Plesk Access:** Administrative or subscription access to Plesk Obsidian with Git extension installed.
-4. **GitLab Push Token:** A Project Access Token or CI variable (`GITLAB_PUSH_TOKEN`) with `write_repository` permission.
-5. **Server Network Routing:** Egress access from Plesk to GitLab over HTTPS (port 443) or SSH (port 22).
+4. **Git Push Credentials:** Approved SSH deploy credentials with repository write permission for `git.ntk.ir`; never embed credentials in Git URLs.
+5. **Server Network Routing:** Egress from Plesk to GitLab over SSH (port 22) for `git.ntk.ir`; HTTPS remains valid for APIs and webhooks.
 
 ---
 
@@ -40,8 +60,8 @@ Before executing, record:
 | In scope | `.gitlab-ci.yml`, Docker runner configuration, branch pushes (`plesk/*`), Plesk Git setup, Webhook creation, HTTP 204 test, smoke check |
 | Out of scope | DNS modifications, TLS certificate purchases, database schema destruction, non-deployment refactors |
 | Owner | Project canonical owner profile (`akaravi` / `NTK`) |
-| Acceptance | Pipeline passes all tests and builds, Plesk card reads back clean branch/path, Webhook returns HTTP 204, live endpoints return HTTP 200 |
-| Verify method | GitLab API / Web UI read-back, Plesk Git read-back, and live `curl -I` / `curl -s` health checks |
+| Acceptance | Exact `publish` tag push runs `test -> build -> health`; all required jobs pass, Plesk card reads back clean branch/path, webhook returns HTTP 204, and configured Swagger/Health checks pass |
+| Verify method | GitLab CI Lint and trigger matrix, GitLab API / Web UI stage read-back, Plesk Git read-back, and bounded GET checks against configured Swagger/Health URLs |
 
 ---
 
@@ -51,16 +71,19 @@ Before executing, record:
    - Compile production bundles (Angular/Vue/React via `pnpm run build:prod`, .NET via `dotnet publish --runtime win-x64 -m:2`).
    - Remove server-owned configuration files (`appsettings*.json`, `web.config`, `nlog*.config`, `.env*`).
 2. **Direct Branch Push:**
-   - Initialize git in the output directory, commit the clean payload, and force-push to the dedicated Plesk branch (e.g. `plesk/<domain-slug>`) on GitLab using `${GITLAB_PUSH_TOKEN}`.
+   - Initialize git in the output directory, commit the clean payload, and push to the dedicated authorized Plesk branch (e.g. `plesk/<domain-slug>`). For `git.ntk.ir`, use `git@git.ntk.ir:<namespace>/<repository>.git` with approved SSH credentials and verified host keys.
    - Tag commits with `[skip ci]` to prevent recursive pipeline triggering.
 3. **Plesk Webhook Call:**
    - Execute an HTTP POST to Plesk's Webhook URL with a body:
      ```bash
-     curl -k -s -X POST -d "" "https://<plesk-host>:8443/modules/git/public/web-hook.php?uuid=<uuid>"
+     code=$(curl --silent --connect-timeout 5 --max-time 15 -X POST -d "" -o /dev/null -w '%{http_code}' "$PLESK_WEBHOOK_URL" 2>/dev/null) && test "$code" = 204
      ```
    - Plesk accepts the request with **`HTTP 204 No Content`** and initiates a background `git pull` into the mapped directory (`\httpdocs`, `\httpdocs.api`, etc.).
 4. **Zero Zip Overhead:**
    - No `artifacts:` archive creation or downloading, drastically speeding up pipelines and saving server storage.
+5. **Health Stage in CI:**
+   - After all build/deployment jobs succeed, wait for Plesk readiness with bounded retries and check each deployed API's Swagger and Health contracts.
+   - HTTP 204 means the asynchronous deployment was accepted, not that the application is healthy.
 
 ---
 
@@ -113,15 +136,9 @@ When the GitLab Runner runs on an Iranian server (e.g. `s20`):
 1. **Clean Slate:** Before adding a repository with an existing name, delete the stale directory under `D:\Inetpub\vhosts\<domain>\git\<repo-name>` via File Manager if a previous task left partial files.
 2. **Windows Non-Interactive Credentials:**
    - Windows IIS runs Git under `psaadm` without an interactive terminal (`/dev/tty`).
-   - If using HTTPS: Configure `_netrc` in `D:\Inetpub\vhosts\<domain>\_netrc` and `C:\Windows\System32\config\systemprofile\_netrc`:
-     ```text
-     machine <gitlab-host>
-     login <username>
-     password <token>
-     ```
-   - Or set project visibility on the private GitLab instance to Public/Internal.
+   - Configure approved SSH credentials and verified GitLab host keys for the account actually used by Plesk. Do not change repository visibility to bypass authentication.
 3. **Repository Setup in Plesk:**
-   - **Repository URL:** `https://<gitlab-host>/<group>/<project>.git`
+   - **Repository URL for `git.ntk.ir`:** `git@git.ntk.ir:<namespace>/<repository>.git`
    - **Repository Name:** `<app-slug>`
    - **Deployment mode:** `Automatic` (or `Manual` initially if directory has existing untracked files).
    - **Deployment directory:** Target directory (e.g. `\httpdocs`, `\httpdocs.api`).
@@ -139,7 +156,7 @@ Plesk's Git webhook endpoint (`/modules/git/public/web-hook.php?uuid=...`):
 
 Always invoke via:
 ```bash
-curl -k -s -X POST -d "" "https://<plesk-host>:8443/modules/git/public/web-hook.php?uuid=<uuid>"
+code=$(curl --silent --connect-timeout 5 --max-time 15 -X POST -d "" -o /dev/null -w '%{http_code}' "$PLESK_WEBHOOK_URL" 2>/dev/null) && test "$code" = 204
 ```
 
 ---
@@ -147,8 +164,9 @@ curl -k -s -X POST -d "" "https://<plesk-host>:8443/modules/git/public/web-hook.
 ## Verification & Acceptance Checklist
 
 - [ ] GitLab Runner is `Online (Idle)` with `executor = "docker"`.
-- [ ] `.gitlab-ci.yml` passes `test` stage (.NET unit tests, Jest tests).
-- [ ] Build jobs compile, strip server-owned files, push to `plesk/*` branches, and call Plesk Webhook.
-- [ ] Plesk Webhook returns HTTP 204.
-- [ ] Plesk Git card displays the latest commit matching the CI commit.
-- [ ] Live domain returns HTTP 200 with the new version manifest.
+- [ ] Only a push of the exact Git tag `publish` creates the release pipeline; negative trigger cases create none.
+- [ ] The stage graph is exactly `test -> build -> health`; all required tests gate every build and every build gates health.
+- [ ] Build jobs compile, strip server-owned files, push to `plesk/*` branches, and require webhook HTTP 204.
+- [ ] Plesk Git card displays the latest deployment commit matching the release source.
+- [ ] Every deployed API passes configured Health semantics, Swagger UI HTTP 200, and valid Swagger/OpenAPI JSON checks in `health`.
+- [ ] A failed probe or readiness timeout fails the pipeline; evidence is redacted and contains no raw response bodies.
