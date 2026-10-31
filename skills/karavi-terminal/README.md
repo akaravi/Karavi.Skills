@@ -10,20 +10,31 @@
 
 ---
 
-## ۱. نقشه و اسکریپت‌های اجرایی (`scripts/`)
+## ۱. پیش‌نیاز و انتخاب کانال
 
-| اسکریپت | کاربرد | مثال فراخوانی |
-|---|---|---|
-| `karavi-terminal.open-interactive.ps1` | باز کردن ترمینال تعاملی SSH یا محلی | `& .\scripts\karavi-terminal.open-interactive.ps1 -HostAlias srv1 -RemoteHost 192.168.1.50 -User admin` |
-| `karavi-terminal.open-agent-session.ps1` | ایجاد نشست شل پایدار برای ایجنت | `& .\scripts\karavi-terminal.open-agent-session.ps1 -SessionId "sess-01" -Shell pwsh` |
-| `karavi-terminal.invoke-agent-command.ps1` | اجرای دستور در نشست ایجنت با کنترل خروجی | `& .\scripts\karavi-terminal.invoke-agent-command.ps1 -SessionId "sess-01" -Command "Get-Process"` |
-| `karavi-terminal.close-agent-session.ps1` | بستن امن نشست شل | `& .\scripts\karavi-terminal.close-agent-session.ps1 -SessionId "sess-01"` |
-| `karavi-terminal.pty-launch.ps1` | راه‌اندازی فرآیند PTY با بافر ابعاد واقعی | `& .\scripts\karavi-terminal.pty-launch.ps1 -Id "pty-1" -Command "bash"` |
-| `karavi-terminal.pty-send-keys.ps1` | ارسال کلیدها و اینپوت به کنسول PTY | `& .\scripts\karavi-terminal.pty-send-keys.ps1 -Id "pty-1" -Keys "top`n"` |
-| `karavi-terminal.pty-wait.ps1` | انتظار هوشمند برای متن یا الگوی خروجی | `& .\scripts\karavi-terminal.pty-wait.ps1 -Id "pty-1" -Pattern "Tasks:" -TimeoutSec 10` |
-| `karavi-terminal.pty-screenshot.ps1` | دریافت اسنپ‌شات متنی/ASCII از صفحه | `& .\scripts\karavi-terminal.pty-screenshot.ps1 -Id "pty-1"` |
-| `karavi-terminal.pty-close.ps1` | خاتمه امن فرآیند PTY | `& .\scripts\karavi-terminal.pty-close.ps1 -Id "pty-1"` |
-| `verify-karavi-terminal-skill.ps1` | بررسی سلامت و صحت انکودینگ اسکریپت‌ها | `& .\scripts\verify-karavi-terminal-skill.ps1` |
+ابتدا [SKILL.md](SKILL.md) و قوانین ریپوی مصرف‌کننده را بخوانید. این مهارت برای جلسهٔ زندهٔ نظارت‌شده است، نه صرفاً ویرایش کد یا جایگزین `karavi-folder`.
+
+- برای اسکریپت‌های محلی، Windows و PowerShell قابل اجرا لازم است؛ نشست ایجنت به‌صورت پیش‌فرض `pwsh.exe` را باز می‌کند و می‌توان `-Shell powershell.exe` داد.
+- ConPTY به Windows دارای API شبه‌کنسول نیاز دارد؛ نصب `node-pty` لازم نیست. شل یا برنامهٔ مقصد باید از قبل موجود باشد.
+- SSH/WSL/Windows Terminal فقط برای سناریوی مربوط لازم‌اند. میزبان، پورت، حساب و احراز هویت باید از کاربر یا تنظیمات همان پروژه بیایند.
+- PID پنجرهٔ کاربر کانال کنترل ایجنت نیست؛ ورود کاربر در آن پنجره، احراز هویت شل جداگانهٔ ایجنت را تضمین نمی‌کند.
+
+مثال‌های زیر از **ریشهٔ همین مخزن** هستند؛ پس از نصب، مسیر `$scripts` را به پوشهٔ واقعی skill تغییر دهید و `-RepoRoot` را همچنان به ریپوی هدف بدهید.
+
+| اسکریپت در `scripts/` | کاربرد و پارامتر مهم |
+|---|---|
+| `karavi-terminal.open-interactive.ps1` | پنجرهٔ SSH تعاملی؛ هر دو مقدار `-RemoteHost` و `-User` لازم‌اند؛ `-RepoRoot`, `-HostAlias`, `-Port`, `-WhatIf`؛ این helper حالت local-only ندارد |
+| `karavi-terminal.open-agent-session.ps1` | نشست پایدار؛ `-RepoRoot`, `-Shell`؛ شناسه توسط اسکریپت تولید می‌شود |
+| `karavi-terminal.invoke-agent-command.ps1` | یک دستور؛ `-SessionId`, `-Command`, `-TimeoutSeconds` |
+| `karavi-terminal.get-agent-session.ps1` / `karavi-terminal.close-agent-session.ps1` | فهرست نشست‌های زنده / بستن نشست متعلق به رجیستری |
+| `karavi-terminal.agent-sanity.ps1` | گزارش شل، نسخه، مسیر و encoding |
+| `karavi-terminal.pty-launch.ps1` | ConPTY؛ `-Command`, `-ArgumentList`, `-WorkingDirectory`, `-Columns`, `-Rows` |
+| `karavi-terminal.pty-send-keys.ps1` | `-RepoRoot`, `-SessionId`, `-Keys`؛ Enter با `\r` |
+| `karavi-terminal.pty-wait.ps1` | انتظار برای پایدارشدن خروجی با `-TimeoutMs`؛ نه انتظار regex |
+| `karavi-terminal.pty-screenshot.ps1` / `karavi-terminal.pty-list.ps1` | صفحهٔ ASCII / فهرست نشست‌ها |
+| `karavi-terminal.pty-resize.ps1` / `karavi-terminal.pty-close.ps1` | تغییر ابعاد / بستن نشست با `-RepoRoot`, `-SessionId` |
+| `karavi-terminal.pty-close-host.ps1` | بستن میزبان و تمام نشست‌های همان ریپو |
+| `verify-karavi-terminal-skill.ps1` | بررسی ساختار و BOM با `-SkillRoot` اختیاری |
 
 ---
 
@@ -41,10 +52,12 @@
 
 ```text
 [درخواست اجرا — MUTATION]
+دسته: تغییر وضعیت سرویس
 دستور: Stop-Service -Name "TelephonyService" -Force
-محدوده: سرور محلی توسعه
+cwd: <مسیر تأییدشده>
 ریسک: قطع سرویس تماس‌های ورودی
-verifyMethod: بررسی عدم وجود PID سرویس با Get-Process
+اثر برگشت‌ناپذیر: خیر
+تأیید: «اجرا کن» / «نه» / «اصلاح: ...»
 ```
 
 ### دستورات کاملاً ممنوع بدون Override اختصاصی
@@ -56,56 +69,73 @@ verifyMethod: بررسی عدم وجود PID سرویس با Get-Process
 
 ## ۳. مثال‌های واقعی و سناریوهای کاربردی (Practical Scenarios)
 
-### سناریو ۱: تست اتصال و بررسی سلامت پورت PJSIP/Asterisk
+### سناریو ۱: آغاز محلی و نشست ایجنت
+
 ```powershell
-# گام ۱: بررسی دسترسی به پورت ۵۰۶۰ سرور لوکال (Read-Only)
-$conn = Test-NetConnection -ComputerName "127.0.0.1" -Port 5060 -InformationLevel Detailed
-if ($conn.TcpTestSucceeded) {
-    Write-Output "Asterisk TCP SIP port is reachable."
-} else {
-    Write-Warning "Asterisk SIP port is unreachable. Checking service status..."
-    Get-Service -Name "asterisk*"
-}
+$repo = (Get-Location).Path
+$scripts = Join-Path $repo 'skills/karavi-terminal/scripts'
+& "$scripts/karavi-terminal.agent-sanity.ps1"
+
+# فقط پس از تأیید ایجاد نشست؛ این عملیات فایل و فرآیند ایجاد می‌کند
+$session = & "$scripts/karavi-terminal.open-agent-session.ps1" -RepoRoot $repo | ConvertFrom-Json
+& "$scripts/karavi-terminal.invoke-agent-command.ps1" -RepoRoot $repo `
+  -SessionId $session.sessionId -Command 'Get-Location' -TimeoutSeconds 30
+
+# بستن فرآیند نیز نیازمند مجوز است
+& "$scripts/karavi-terminal.close-agent-session.ps1" -RepoRoot $repo -SessionId $session.sessionId
 ```
 
-### سناریو ۲: راه‌اندازی نشست PTY و تعامل با کنسول لینوکسی (Asterisk CLI)
+برای SSH تعاملی، کاربر یا ایجنتِ دارای مجوز `open-interactive` را با پارامترهای پروژه اجرا می‌کند. کاربر شخصاً login می‌کند و `ready` می‌فرستد. تا قبل از آن فقط sanity محلی Read-Only انجام دهید؛ اتصال غیرتعاملی از پیش پیکربندی‌شده باید صریحاً مشخص باشد.
+
+### سناریو ۲: ConPTY و کنسول Asterisk در WSL
+
+فقط اگر WSL و Asterisk نصب و محیط مجاز مشخص است؛ launch، ارسال کلید و close هرکدام Mutation هستند و تأیید لازم دارند:
+
 ```powershell
-# راه‌اندازی نشست تعاملی
-& .\scripts\karavi-terminal.pty-launch.ps1 -Id "ast-cli" -Command "wsl" -Args @("asterisk", "-rvvv")
-
-# انتظار برای ظاهر شدن اعلان کنسول Asterisk
-& .\scripts\karavi-terminal.pty-wait.ps1 -Id "ast-cli" -Pattern "CLI>" -TimeoutSec 5
-
-# ارسال دستور مشاهده وضعیت ترانک‌های PJSIP
-& .\scripts\karavi-terminal.pty-send-keys.ps1 -Id "ast-cli" -Keys "pjsip show endpoints`n"
-
-# دریافت تصویر متنی وضعیت ترمینال
-$screen = & .\scripts\karavi-terminal.pty-screenshot.ps1 -Id "ast-cli"
-Write-Output $screen
-
-# خروج و بستن نشست
-& .\scripts\karavi-terminal.pty-send-keys.ps1 -Id "ast-cli" -Keys "exit`n"
-& .\scripts\karavi-terminal.pty-close.ps1 -Id "ast-cli"
+$pty = & "$scripts/karavi-terminal.pty-launch.ps1" -RepoRoot $repo `
+  -Command 'wsl.exe' -ArgumentList @('asterisk', '-rvvv') | ConvertFrom-Json
+& "$scripts/karavi-terminal.pty-wait.ps1" -RepoRoot $repo -SessionId $pty.sessionId -TimeoutMs 1000
+& "$scripts/karavi-terminal.pty-send-keys.ps1" -RepoRoot $repo `
+  -SessionId $pty.sessionId -Keys 'pjsip show endpoints\r'
+& "$scripts/karavi-terminal.pty-screenshot.ps1" -RepoRoot $repo -SessionId $pty.sessionId
+& "$scripts/karavi-terminal.pty-close.ps1" -RepoRoot $repo -SessionId $pty.sessionId
 ```
 
-### سناریو ۳: اجرای دستور نیازمند تأیید در قالب امن (WhatIf)
-```powershell
-# بررسی تغییرات قبل از حذف پوشه موقت لاگ
-Remove-Item -Path "karavi/karavi.temp.logs/*" -Recurse -WhatIf
-```
+`WorkingDirectory` باید داخل ریپوی هدف باشد؛ حداکثر ۲۰ نشست، عرض ۲۰ تا ۵۰۰، ارتفاع ۵ تا ۲۰۰ و حداکثر ۱۰۰۰۰ کاراکتر ورودی پشتیبانی می‌شود. صفحهٔ بازگشتی محدود و redact شده است؛ این فیلتر تضمین حذف همهٔ سکرت‌ها نیست.
+
+### سناریو ۳: تشخیص Read-Only و پیش‌نمایش تغییر
+
+`Test-NetConnection -ComputerName 127.0.0.1 -Port 5060` فقط اتصال **TCP** را می‌سنجد، نه ثبت SIP روی UDP یا سلامت RTP. برای پیش‌نمایش حذف، `Remove-Item -Path 'karavi/karavi.temp.logs/*' -Recurse -WhatIf` را فقط در محدودهٔ مجاز به‌کار ببرید؛ پیش‌نمایش مجوز حذف واقعی نیست.
 
 ---
 
 ## ۴. نصب و راه‌اندازی (Installation)
 
 ```bash
-npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-terminal
+pnpm dlx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-terminal
 ```
 
 فراخوانی در چت با ایجنت:
 ```text
 /karavi-terminal
 ```
+
+نصب به Node.js و `pnpm` موجود نیاز دارد و کاتالوگ محلی را تغییر می‌دهد؛ فقط در scope مجاز اجرا شود. این دستور SSH، WSL یا runtime سیستم را نصب نمی‌کند. پس از نصب، مسیر واقعی، frontmatter و لینک‌ها را بررسی کنید؛ [راهنمای نصب و کشف](references/discovery-and-install.md) را ببینید.
+
+## خروجی و ارزیابی
+
+- نشست ایجنت JSON شامل `sessionId`, PID و مسیر دارد. نتیجهٔ دستور شامل `stdout`, `stderr`, `nativeExitCode`, `powerShellSucceeded`, `timedOut` و شناسهٔ دستور است؛ صرف `status=completed` دلیل موفقیت برنامهٔ native نیست.
+- رجیستری در `karavi.temp.status/karavi-terminal-sessions.json` و wrapperها در `.cursor/karavi-terminal/` ساخته می‌شوند. رجیستری با PID **و زمان شروع فرآیند** تطبیق داده می‌شود؛ حتی فهرست‌گیری ایجنت ممکن است رجیستری را بازنویسی کند.
+- میزبان ConPTY یک فرآیند برای هر ریپو و رکورد `karavi.temp.status/karavi-terminal-pty-host.json` دارد؛ توقف میزبان همهٔ نشست‌هایش را متوقف می‌کند. درخواست‌های PTY ممکن است میزبان محلی را راه‌اندازی کنند؛ Read-Only بودن screenshot ناظر به برنامهٔ هدف است، نه تضمین نبودن اثر محلی.
+- timeout انتظار پاسخ، اثبات لغو دستور نیست؛ پیش از تکرار Mutation وضعیت واقعی را بررسی کنید. خروجی خام نشست ایجنت را پیش از انتشار redact کنید.
+
+بررسی ساختاری زیر از ریشهٔ مخزن قابل اجراست؛ موفقیت آن فقط ساختار، نام‌ها و نبود BOM را می‌سنجد، نه SSH، ConPTY یا یک سرور زنده:
+
+```powershell
+& .\skills\karavi-terminal\scripts\verify-karavi-terminal-skill.ps1
+```
+
+در جلسهٔ واقعی shell/cwd/version/encoding، کانال ورود، مجوز هر تغییر، exit code و شواهد ماسک‌شده را ثبت کنید. تست‌های رگرسیون در [نشست ایجنت](tests/karavi-terminal.agent-session.Tests.ps1) و [ConPTY](tests/karavi-terminal.pty.Tests.ps1) هستند؛ این README ادعای اجرای آن‌ها ندارد.
 
 ---
 
@@ -116,9 +146,12 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-terminal
 - [`references/pty-sessions.md`](references/pty-sessions.md) — جزئیات فنی پروتکل PTY و مانیتورینگ خروجی
 - [`references/examples.md`](references/examples.md) — نمونه‌های تکمیلی JSON envelope و پوشش خروجی‌ها
 - [`references/orca-terminal.md`](references/orca-terminal.md) — یکپارچه‌سازی با ترمینال محیط Orca
+- [چرخهٔ نشست](references/session-lifecycle.md)، [کانال کاربر و ایجنت](references/agent-terminals.md) و [ثبت شواهد](references/verification-and-capture.md)
+- [PowerShell](references/powershell-core.md)، [Windows Terminal](references/windows-terminal.md)، [Windows DevOps](references/windows-devops.md)
+- [Computer Use](references/computer-use-bridge.md) و [یکپارچه‌سازی Karavi](references/karavi-integration.md)
 
 ---
 
 ## ۶. License
 
-Apache-2.0
+[Apache-2.0](LICENSE)

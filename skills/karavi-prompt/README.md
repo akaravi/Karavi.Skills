@@ -67,49 +67,81 @@ URL می‌تواند خودش را دستور جا بزند)، و **معیار 
 
 | دستور چت | اثر | معادل اسکریپتی |
 |---|---|---|
-| `/karavi-prompt auto on` | فعال‌سازی خودکار تسلیح برای تمام ساب‌ایجنت‌ها | `& .\scripts\karavi-prompt.auto.ps1 -On` |
-| `/karavi-prompt auto off` | بازگشت به حالت دستی و غیرفعال‌سازی تسلیح خودکار | `& .\scripts\karavi-prompt.auto.ps1 -Off` |
-| `/karavi-prompt auto status` | مشاهده وضعیت فعلی رهگیری خودکار و ایجنت‌های هدف | `& .\scripts\karavi-prompt.auto.ps1 -Status` |
+| `/karavi-prompt auto on` | فعال‌سازی سیاست تسلیح برای subagentها | `karavi-prompt.auto.ps1 -On` |
+| `/karavi-prompt auto off` | بازگشت به حالت دستی | `karavi-prompt.auto.ps1 -Off` |
+| `/karavi-prompt auto status` | مشاهدهٔ state و targetها | `karavi-prompt.auto.ps1 -Status` |
 
 هنگامی که `auto on` است، ایجنت اصلی بدون نیاز به دستور مجدد کاربر، پرامپت ارسالی به subagent را ابتدا مهندسی، اسکن سکرت/تزریق و کادر‌بندی کرده و سپس ارسال می‌کند.
+
+helper فقط state را ذخیره/نمایش می‌دهد؛ نصب hook عمومی در همهٔ hostها انجام
+نمی‌دهد. رعایت این state و عبور dispatch از pipeline مسئولیت agent/adapter میزبان
+است. Auto Mode مجوز mutation، network یا دورزدن guard نیست.
 
 ## نصب
 
 ```bash
-npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-prompt
+pnpm dlx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-prompt
 ```
 
 ## استفاده
+
+برای helperها PowerShell و دسترسی به فایل‌های skill لازم است. نمونه‌ها از root
+repository و با فرض نصب در `.agents/skills/karavi-prompt/` هستند؛ مسیر واقعی نصب
+را جایگزین کنید. بدون shell، agent باید guard را اعمال و panel markdown را طبق
+[قرارداد panel](references/panel-and-dispatch.md) تولید کند. این skill جایگزین
+ویرایش معمول کد یا verdict پذیرش `karavi-judge` نیست.
+
+قبل از `arm`، spec را مطابق [schema واقعی](references/arming-pipeline.md#spec-schema)
+بسازید: `rawPrompt` و `armedPrompt`، `intent` شامل goal، scope، outOfScope،
+constraints، acceptance، verifyMethod و untrusted و نیز `target` در سطح بالای
+JSON با host، agent، model و mode. helper متن خام را خودش مهندسی نمی‌کند؛
+agent باید `armedPrompt` کامل را پیش از اجرای آن آماده کند. spec نیز نباید secret
+داشته باشد؛ guard مجوز ذخیرهٔ credential در فایل ورودی نیست.
 
 ```powershell
 # ۱) spec بنویس (الگو در references/templates.md)
 # ۲) arm کن: guard + panel + ledger + متن dispatch
 & .agents/skills/karavi-prompt/scripts/karavi-prompt.arm.ps1 -Spec .\spec.json -RepoRoot (Get-Location)
 
+# مقدارهای نمونه را با مسیر ENVELOPE و شناسهٔ RUN خروجی بالا جایگزین کنید
+$envelopePath = '.\path-to-returned-envelope.json'
+$runId = 'returned-run-id'
+
 # guard را مستقل روی یک run ذخیره‌شده دوباره اجرا کن
-& .agents/skills/karavi-prompt/scripts/karavi-prompt.guard.ps1 -Run <envelope.json>
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.guard.ps1 -Run $envelopePath
 
 # فقط کادر را دوباره رسم کن
-& .agents/skills/karavi-prompt/scripts/karavi-prompt.panel.ps1 -Run <envelope.json> -Format Markdown
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.panel.ps1 -Run $envelopePath -Format Markdown
 
 # ledger
-& .agents/skills/karavi-prompt/scripts/karavi-prompt.ledger.ps1 -Id <runId> -Event closed -Outcome accept -Score 4.2
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.ledger.ps1 -Id $runId -Event closed -Outcome accept -Score 4.2
 
 # پاک‌سازی runهای قدیمی (karavi-folder clean زیرپوشهٔ runs/ را نمی‌بیند)
 & .agents/skills/karavi-prompt/scripts/karavi-prompt.ledger.ps1 -Purge -OlderThanDays 14 -WhatIf
 
 # کادر ASCII برای ترمینالی که UTF-8 را نمی‌کشد
-& .agents/skills/karavi-prompt/scripts/karavi-prompt.panel.ps1 -Run <envelope.json> -Ascii
-```
+& .agents/skills/karavi-prompt/scripts/karavi-prompt.panel.ps1 -Run $envelopePath -Ascii
 
 # فعال و غیرفعال‌سازی خودکار تسلیح پرامپت‌ها به ساب‌ایجنت‌ها
 & .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -On -Targets task,pm-builder
 & .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -Off
 & .agents/skills/karavi-prompt/scripts/karavi-prompt.auto.ps1 -Status
+```
 
 خروجی `arm.ps1`: کادر، سپس `RUN`، `VERDICT`، `ENVELOPE`، `PROMPT`، و پس از
 `---DISPATCH---` خودِ متن مسلح‌شده. روی `block` هیچ کادری رسم نمی‌شود و فقط
 یافته‌ها گزارش می‌شوند.
+
+helper فقط متن dispatch را **خروجی می‌دهد**؛ فراخوانی agent هدف بر عهدهٔ میزبان
+است. مثال panel بالا نمایشی است و نتیجهٔ تست یا اجرای واقعی نیست. روی `pass|warn`
+ابتدا panel را نمایش دهید و سپس همان متن را به یک target بدهید؛ تغییر متن یا
+target نیاز به re-arm، digest و panel تازه دارد.
+
+artifactها شامل envelope، متن خام، armed text و panel در
+`karavi.temp.status/karavi-prompt/runs/` و ledger در
+`karavi.temp.status/karavi-prompt/karavi-prompt.jsonl` هستند. پس از پاسخ target،
+run را با outcome واقعی ببندید؛ score نمونه فقط در صورت ارزیابی واقعی استفاده شود.
+`-Purge -WhatIf` صرفاً preview است؛ حذف واقعی نیازمند مجوز است و ledger را پاک نمی‌کند.
 
 ## کدهای خروجی
 
@@ -134,7 +166,6 @@ RAG، پرامپت ابزار و agent، CoT و chaining، و rubric ارزیا�
 | [prompt-architecture.md](references/prompt-architecture.md) | هفت لایه، XML در برابر markdown، ترتیب |
 | [optimization-playbook.md](references/optimization-playbook.md) | کلاس مدل، کاتالوگ تکنیک، بودجهٔ توکن، فشرده‌سازی |
 | [anti-patterns.md](references/anti-patterns.md) | کاتالوگ نقص‌ها با اصلاح |
-
 | [constraints-and-guardrails.md](references/constraints-and-guardrails.md) | طیف constraint، meta-rule، guardrail، تست |
 | [security-and-injection.md](references/security-and-injection.md) | مدل taint، لایه‌های دفاع، red-team |
 | [grounding-and-context.md](references/grounding-and-context.md) | quote-then-answer، context بلند، project map |
@@ -151,7 +182,7 @@ skills/karavi-prompt/
 ├── README.md     مستندات کاربر
 ├── LICENSE       Apache-2.0
 ├── references/   بارگذاری on-demand، یک فایل برای هر موضوع
-├── scripts/      guard · panel · arm · ledger · verify
+├── scripts/      guard · panel · arm · ledger · auto · verify
 └── tests/        Pester
 ```
 
@@ -161,6 +192,12 @@ skills/karavi-prompt/
 & .agents/skills/karavi-prompt/scripts/verify-karavi-prompt-skill.ps1
 Invoke-Pester .agents/skills/karavi-prompt/tests
 ```
+
+این‌ها روش‌های verification برای نصب محلی‌اند، نه ادعای موفقیت اجرا. علاوه بر
+ساختار، acceptance هر run نیازمند intent کامل، untrusted برچسب‌خورده، guard بدون
+block، panel پیش از dispatch، متن یکسان و outcome ثبت‌شده است. guard تشخیص
+الگویی است، نه تضمین کشف همهٔ secretها یا injectionها؛ قضاوت مهندسی همچنان لازم است.
+
 
 ## مرتبط
 

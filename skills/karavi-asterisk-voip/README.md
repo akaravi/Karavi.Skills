@@ -3,9 +3,9 @@
 مرجع جامع، مهندسی‌شده و **نسخه‌آگاه (Version-Aware)** برای توسعه، راه‌اندازی، اتصال برنامه‌های سازمانی، تست و عیب‌یابی سامانه‌های تلفنی مبتنی بر **Asterisk و VoIP**.
 
 - **نسخه کانونیکال مرجع:** `Asterisk 22 LTS`
-- **سازگاری و ارتقا:** نکات انطباق برای Asterisk 16 Legacy، Asterisk 20 LTS و Asterisk 24
+- **سازگاری و ارتقا:** راهنماهای جداگانه برای Asterisk 16، 20، 23 و 24؛ وجود راهنما تضمین سازگاری هر ماژول یا کتابخانه با همهٔ نسخه‌ها نیست.
 
-این مهارت یک راهنمای کامل عملیاتی برای برنامه‌نویسان دات‌نت (.NET)، پایتون و مهندسان شبکه و مخابرات است تا بتوانند بدون ریسک تداخل در محیط‌های عملیاتی تماس، سرویس‌های تلفنی پایدار بسازند.
+این مهارت راهنمای دامنه برای برنامه‌نویسان و مهندسان مخابرات است، نه PBX نصب‌شونده یا کتابخانهٔ کلاینت. قراردادهای برنامه، authorization و persistence جای خود را به تنظیمات Asterisk نمی‌دهند. مرجع تصمیم‌گیری و مسیریابی کامل در [SKILL.md](SKILL.md) است.
 
 ---
 
@@ -15,7 +15,7 @@
 skills/karavi-asterisk-voip/
 ├── SKILL.md              نقطه ورود، چک‌لیست‌ها و قواعد تصمیم‌گیری
 ├── README.md             مستندات اصلی، دستورات و مثال‌های کاربردی
-└── references/           بیش از ۶۰ مرجع تخصصی بر اساس تفکیک دامنه‌ها:
+└── references/           مرجع‌های تخصصی بر اساس تفکیک دامنه‌ها:
     ├── pjsip-sip.md                      پیکربندی مدرن PJSIP، ترانک و Endpoint
     ├── ari.md / ari-dotnet-*.md          رابط REST و WebSocket برای کنترل کامل تماس
     ├── ami.md / ami-dotnet-*.md          رویدادها و مانیتورینگ بلادرنگ تماس‌ها با AMI
@@ -30,163 +30,55 @@ skills/karavi-asterisk-voip/
 
 ---
 
-## ۲. سناریوهای کاربردی همراه با کدهای اجرایی
+## ۲. پیش‌نیاز و استفادهٔ عملی
 
-### سناریو ۱: ایجاد ترانک امن PJSIP در `pjsip.conf`
-پیکربندی ترانک خروجی به سمت ارائه‌دهنده سرویس (Sip Provider) با احراز هویت و ثبت (Registration):
+برای مطالعه فقط یک agent با قابلیت خواندن skill لازم است. پیش از پیاده‌سازی یا اتصال زنده، این اطلاعات را از پروژه و محیط واقعی تعیین کنید:
 
-```ini
-; ====================================================================
-; PJSIP Trunk Configuration — Endpoint, AOR, Auth, Registration
-; ====================================================================
+- نسخهٔ دقیق Asterisk/FreePBX، سیستم‌عامل، topology، channel driver (`PJSIP` یا `chan_sip`) و ماژول‌های فعال.
+- transport، سیاست codec، مسیر SIP/RTP و NAT، endpoint یا trunk آزمایشی و حساب کم‌اختیار مجاز.
+- زبان، نسخهٔ runtime و کتابخانهٔ adapter پروژه؛ .NET، Python، Node.js، SIPp یا Test Suite فقط برای سناریوی مربوط لازم‌اند، نه همهٔ مصرف‌کنندگان.
+- scope محیط، مجوز عملیات، قرارداد خطا و دادهٔ برنامه، سیاست recording/PII و rollback.
 
-[transport-udp]
-type=transport
-protocol=udp
-bind=0.0.0.0:5060
+مهارت را برای طراحی، پیاده‌سازی، review یا عیب‌یابی AMI/ARI/AGI، dialplan، صف و media به‌کار ببرید. برای نصب عمومی سیستم‌عامل، مدیریت رمزها یا اعمال خودکار تغییر production به آن تکیه نکنید.
 
-[trunk-telco-reg]
-type=registration
-outbound_auth=trunk-telco-auth
-server_uri=sip:sip.telco-provider.ir
-client_uri=sip:9821000000@sip.telco-provider.ir
-retry_interval=60
-expiration=3600
+### سناریو ۱: طراحی ترانک PJSIP
 
-[trunk-telco-auth]
-type=auth
-auth_type=userpass
-username=9821000000
-password=ENV_TELCO_SECRET ; سکرت‌ها هرگز نباید هاردکد شوند
-
-[trunk-telco-aor]
-type=aor
-contact=sip:sip.telco-provider.ir:5060
-
-[trunk-telco]
-type=endpoint
-context=from-telco-incoming
-disallow=all
-allow=alaw,ulaw,g729
-aors=trunk-telco-aor
-outbound_auth=trunk-telco-auth
-direct_media=no
-force_rport=yes
-rewrite_contact=yes
+```text
+با karavi-asterisk-voip تنظیمات PJSIP این پروژه را بررسی کن.
+ابتدا نسخه، transport، NAT و codec policy را از شواهد موجود مشخص کن.
+فقط طرح endpoint/AOR/auth/registration و تست‌های لازم را پیشنهاد بده؛
+هیچ فایل سرور، reload، registration یا تماس واقعی را اجرا نکن.
 ```
 
----
+از [PJSIP پایه](references/pjsip-sip.md)، [ترانک و failover](references/pjsip-advanced.md) و [مدل configuration](references/configuration-model.md) شروع کنید. مقادیر provider و secret باید از تنظیمات مجاز بیایند؛ نوشتن `password=ENV_TELCO_SECRET` به‌خودی‌خود environment expansion ایجاد نمی‌کند. فایل‌های تولیدشدهٔ FreePBX را دستی بازنویسی نکنید.
 
-### سناریو ۲: پردازش تماس با FastAGI در سی‌شارپ (.NET Core BackgroundService)
-پیاده‌سازی یک سرور سبک TCP برای پاسخ‌گویی به درخواست‌های دیال‌پلن استریسک:
+### سناریو ۲: FastAGI در .NET
 
-```csharp
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+برای hosting، framing و shutdown از [FastAGI hosted service](references/fastagi-dotnet-hosted-service.md) و [قرارداد AGI](references/agi-fastagi.md) استفاده کنید. نمونهٔ [حلقهٔ فرمان](references/code-examples.md) الگوی adapter است، نه برنامهٔ آمادهٔ production: خواندن environment تا خط خالی، تفسیر نتیجهٔ هر فرمان، cancellation/hangup، deadline و disposal باید مطابق پروژه آزموده شود. Caller ID را در لاگ خام ننویسید و listener را بدون ACL عمومی نکنید.
 
-public class FastAgiServer : BackgroundService
-{
-    private readonly ILogger<FastAgiServer> _logger;
-    private readonly TcpListener _listener = new(IPAddress.Any, 4573);
+### سناریو ۳: ARI، WebSocket و Stasis
 
-    public FastAgiServer(ILogger<FastAgiServer> logger) => _logger = logger;
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        _listener.Start();
-        _logger.LogInformation("FastAGI listener running on port 4573...");
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            var client = await _listener.AcceptTcpClientAsync(stoppingToken);
-            _ = HandleAgiSessionAsync(client, stoppingToken);
-        }
-    }
-
-    private async Task HandleAgiSessionAsync(TcpClient client, CancellationToken ct)
-    {
-        using var stream = client.GetStream();
-        using var reader = new StreamReader(stream);
-        using var writer = new StreamWriter(stream) { AutoFlush = true };
-
-        // 1. خواندن هدرهای اولیه AGI تا سطر خالی
-        string line;
-        string callerId = "unknown";
-        while (!string.IsNullOrEmpty(line = await reader.ReadLineAsync(ct)))
-        {
-            if (line.StartsWith("agi_callerid:"))
-                callerId = line.Substring("agi_callerid:".Length).Trim();
-        }
-
-        _logger.LogInformation("Incoming call via FastAGI from {CallerId}", callerId);
-
-        // 2. ارسال دستور استریسک: پخش پیام صوتی خوش‌آمد
-        await writer.WriteLineAsync("STREAM FILE custom-welcome \"#\"");
-        var response = await reader.ReadLineAsync(ct);
-
-        // 3. تنظیم متغیر در دیال‌پلن
-        await writer.WriteLineAsync("SET VARIABLE CUSTOMER_STATUS \"VIP\"");
-        await reader.ReadLineAsync(ct);
-    }
-}
+```text
+برای adapter فعلی پروژه، جریان StasisStart تا playback و Hangup را طراحی کن.
+قرارداد REST و WebSocket، correlation، reconnect و cleanup را جدا ثبت کن؛
+احراز هویت از secret store پروژه باشد و URL حاوی credential وارد لاگ نشود.
+فقط تغییرات محلی و تست‌های قرارداد؛ تماس زنده یا تغییر PBX مجاز نیست.
 ```
 
----
+راهنماهای [ARI](references/ari.md)، [ARI در .NET](references/ari-dotnet-websocket-stasis.md) و [نمونه‌های پیاده‌سازی](references/code-examples.md) را با نسخه و کتابخانهٔ واقعی تطبیق دهید. موفقیت درخواست playback یا AMI Originate فقط پذیرش عملیات است؛ رویدادها و media باید نتیجهٔ واقعی را ثابت کنند.
 
-### سناریو ۳: کنترل تماس تعاملی با WebSocket و ARI (Asterisk REST Interface)
-ورود تماس به برنامه Stasis و انتقال تماس به مقصد دیگر با درخواست HTTP:
+### سناریو ۴: عیب‌یابی Read-Only در Linux
 
-**دیال‌پلن در `extensions.conf`:**
-```ini
-[default]
-exten => 9000,1,NoOp(Entry point for ARI Stasis Application)
- same => n,Answer()
- same => n,Stasis(VoiceBotApp)
- same => n,Hangup()
-```
-
-**کد کنترل‌کننده در Node.js یا C# با ARI WebSocket:**
-```javascript
-const WebSocket = require('ws');
-const axios = require('axios');
-
-const ARI_URL = 'http://127.0.0.1:8088/ari';
-const AUTH_HEADER = { auth: { username: 'ariuser', password: process.env.ARI_PASSWORD } };
-
-const ws = new WebSocket('ws://127.0.0.1:8088/ari/events?api_key=ariuser:' + process.env.ARI_PASSWORD + '&app=VoiceBotApp');
-
-ws.on('message', async (data) => {
-    const event = JSON.parse(data);
-    if (event.type === 'StasisStart') {
-        const channelId = event.channel.id;
-        console.log(`Call entered VoiceBotApp on channel ${channelId}`);
-
-        // پخش فایل صوتی از طریق REST API
-        await axios.post(`${ARI_URL}/channels/${channelId}/play?media=sound:hello-world`, {}, AUTH_HEADER);
-    }
-});
-```
-
----
-
-### سناریو ۴: عیب‌یابی کیفیت صدا و افت پکت RTP در لینوکس
-بررسی بلادرنگ ترافیک مدیا و عیب‌یابی تأخیر صدا بدون ایجاد بار روی سرور:
+این فرمان‌ها فقط در شل محیط مجاز دارای Asterisk و دسترسی CLI اجرا می‌شوند؛ خروجی ممکن است شناسهٔ تماس یا endpoint داشته باشد و باید قبل از اشتراک ماسک شود:
 
 ```bash
-# ۱. مانیتورینگ جریان RTP به تفکیک پکت‌ها و Jitter
+asterisk -rx "core show version"
+asterisk -rx "pjsip show endpoints"
+asterisk -rx "core show channels"
 asterisk -rx "pjsip show channelstats"
-
-# ۲. ضبط فشرده پکت‌های SIP و RTP یک تماس خاص با sngrep
-sngrep -c -O /tmp/call-debug.pcap port 5060 or portrange 10000-20000
-
-# ۳. بررسی باز بودن محدوده پورت‌های مدیا در فایروال
-iptables -L -n -v | grep 10000:20000
 ```
+
+خروجی به نسخه و ماژول‌ها وابسته است. آمار channel فقط یک شاهد است، نه اثبات صدای دوطرفه. packet capture با `sngrep`/`tcpdump` فایل و دادهٔ حساس تولید می‌کند؛ مقصد، مدت، فیلتر، retention و مجوز آن را پیش از اجرا تعیین کنید. دستورات دقیق تشخیص در [مرجع Linux](references/linux-asterisk-command-reference.md) و [runbookها](references/troubleshooting-runbooks.md) آمده‌اند.
 
 ---
 
@@ -197,28 +89,57 @@ iptables -L -n -v | grep 10000:20000
 | `pjsip show endpoints` | وضعیت تمام شماره‌های داخلی و خطوط | نام، وضعیت (Avail/Unavailable) و AOR |
 | `core show channels` | تعداد تماس‌های فعال در لحظه | لیست لاین‌ها و کانال‌های فعال در حال مکالمه |
 | `queue show <queue_name>` | وضعیت صف، اپراتورها و تماس‌گیرندگان در صف | لیست کاربران لاگین‌شده و تماس‌های منتظر |
-| `module reload res_pjsip.so` | اعمال تغییرات کانفیگ بدون قطعی سرور | تایید بارگذاری مجدد ماژول SIP |
-| `logger reload` | تازه‌سازی فایل‌های لاگ استریسک | چرخش و اعمال لاگ‌های جدید در `/var/log/asterisk/` |
+| `module reload res_pjsip.so` | درخواست reload ماژول؛ تغییر وضعیت و نیازمند مجوز صریح | خروجی و اثر وابسته به نسخه/تنظیم؛ تضمین بی‌قطعی نیست |
+| `logger reload` | اعمال دوبارهٔ تنظیمات logger؛ نیازمند مجوز | نتیجهٔ reload؛ معادل تضمین چرخش لاگ نیست |
 
 ---
 
 ## ۴. مرزهای ایمنی و امنیت مخابراتی (Security Safeguards)
 
 1. **جلوگیری از Toll Fraud:** دسترسی تماس‌های بین‌المللی یا ترانک‌های خروجی نباید در کانتکست‌های پیش‌فرض مثل `default` یا `from-sip` باز باشد.
-2. **جداسازی شبکه مدیا و سیگنالینگ:** پورت‌های RTP (`10000-20000`) باید با فایروال تنها به مقاصد معتبر محدود شوند.
-3. **عدم افشای سکرت‌ها:** پسورد ترانک‌ها و کاربران ARI هرگز نباید در ریپازیتوری ذخیره شود؛ همیشه از متغیرهای محیطی یا سکرت والت استفاده کنید.
-4. **تغییرات Live PBX:** هرگونه کامند مخرب نظیر `core restart now` یا تغییرات دیال‌پلن در محیط پروداکشن نیازمند مجوز صریح است.
+2. **جداسازی شبکه مدیا و سیگنالینگ:** محدودهٔ RTP را از `rtp.conf` واقعی کشف و به peers مجاز محدود کنید؛ `10000-20000` صرفاً یک نمونهٔ رایج است.
+3. **عدم افشای سکرت‌ها:** credential، شمارهٔ کامل، recording و PII در Git، chat، fixture و لاگ قرار نگیرد؛ روش تزریق امن باید واقعاً توسط deployment پروژه پشتیبانی شود.
+4. **تغییرات Live PBX:** هر reload، restart، Originate، transfer، تغییر credential یا فایروال مجوز صریح همان محیط و عملیات را می‌خواهد؛ نصب مهارت مجوز اجرا نیست.
+5. **کنترل تماس:** retry محدود و فقط برای عملیات امن، idempotency و correlation، I/O قابل لغو، UTC و cleanup را در مرز adapter رعایت کنید.
 
 ---
 
 ## ۵. نصب مهارت
 
 ```bash
-npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-asterisk-voip
+pnpm dlx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-asterisk-voip
 ```
+
+این نمونه نیازمند Node.js و `pnpm` موجود و اجازهٔ تغییر کاتالوگ محلی است. نصب skill، Asterisk، FreePBX، runtime، trunk یا ابزارهای تست را نصب/پیکربندی نمی‌کند. مسیر نصب، [SKILL.md](SKILL.md) و references را پس از نصب بررسی کنید؛ سپس نام مهارت و سناریوی موردنظر را در درخواست agent بیاورید.
+
+## ۶. خروجی، شواهد و ارزیابی
+
+خروجی کار باید نسخه و فرض‌ها، adapter و consumerهای متاثر، تغییرات code/config، کلیدهای configuration بدون مقدار محرمانه، ریسک/rollback و وضعیت واقعی تست‌ها را مشخص کند. این skill فایل خروجی ثابت یا PBX آماده تولید نمی‌کند؛ نمونه‌های مرجع الگو هستند.
+
+بررسی‌های ساختاری زیر با Python 3 دارای پشتیبانی type annotationهای به‌کاررفته در اسکریپت‌ها، از ریشهٔ مخزن قابل اجرا هستند:
+
+```bash
+python skills/karavi-asterisk-voip/scripts/verify-doc-coverage.py --skill skills/karavi-asterisk-voip --matrix skills/karavi-asterisk-voip/references/coverage-matrix.md
+python skills/karavi-asterisk-voip/scripts/verify-examples.py --skill skills/karavi-asterisk-voip
+```
+
+اسکریپت اول domainهای ماتریس، فایل‌ها، metadata و لینک‌های router را بررسی می‌کند. دومی headingها، fenceهای نمونه و واژه‌های الزامی مرجع Linux را می‌سنجد؛ کد C# را compile یا تماس/RTP را آزمایش نمی‌کند. هر دو برای موفقیت `0` و برای شکست `1` برمی‌گردانند. [build-doc-index.py](scripts/build-doc-index.py) ابزار جداگانهٔ تولید JSON با `--source` و `--output` است و فایل می‌نویسد؛ برای استفادهٔ عادی لازم نیست.
+
+ارزیابی محصول شامل تست parsing/mapping، auth و timeout، duplicate action، disconnect/reconnect، hangup cleanup، registration، routing و media دوطرفه است. [Test Suite](references/testing-asterisk-test-suite.md) و [SIPp/load/fault](references/testing-sipp-load-faults.md) راهنما هستند، نه ادعای اجرای تست. نبود PBX، trunk، حساب یا مسیر شبکه را با resume condition گزارش کنید؛ از static check نتیجهٔ سلامت تماس نگیرید.
+
+## ۷. نقشهٔ منابع
+
+- [ماتریس پوشش و منابع رسمی](references/coverage-matrix.md)، [سازگاری نسخه](references/version-compatibility.md)، [Asterisk 16](references/asterisk-16-legacy-compatibility.md)، [Asterisk 24](references/asterisk-24-version-matrix.md)
+- [مبانی](references/fundamentals.md)، [build/backup/rollback](references/build-deployment-operation.md)، [امن‌سازی](references/security-hardening.md)
+- [AMI](references/ami.md)، [قرارداد AMI در .NET](references/ami-dotnet-client-contract.md)، [معماری .NET](references/dotnet-asterisk-implementation.md)
+- [Dialplan/IVR](references/dialplan-ivr.md)، [FreePBX/Call File/recording](references/dialplan-freepbx-callfile-recording.md)، [صف و monitoring](references/queue-chanspy-recording-monitoring.md)
+- [RTP/media](references/rtp-media-codecs.md)، [WebRTC/WSS](references/sip-wss-webrtc-webphone.md)، [CDR/CEL](references/cdr-cel-realtime.md)، [observability](references/troubleshooting-observability.md)
+- [ماتریس یکپارچه‌سازی پروژه](references/karavi-project-integration-matrix.md)، [نمونهٔ پروژه](references/example-projects.md)، [router کامل موضوع‌ها](SKILL.md)
+
+مستندات رسمی [Asterisk](https://docs.asterisk.org/) مرجع پروتکل‌اند؛ کتابخانهٔ ثالث فقط dependency پیاده‌سازی است و رفتار wire آن باید روی نسخهٔ مقصد آزموده شود.
 
 ---
 
-## ۶. License
+## ۸. License
 
-Apache-2.0
+[Apache-2.0](LICENSE)

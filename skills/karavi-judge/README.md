@@ -25,7 +25,7 @@
 ## نصب
 
 ```bash
-npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-judge
+pnpm dlx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-judge
 ```
 
 ## استفاده
@@ -38,6 +38,17 @@ migration، release candidate یا خروجی چند agent باید قبل از 
 ```text
 /karavi-judge نتیجهٔ پیاده‌سازی و evidence تست‌های این scope را بررسی کن
 ```
+
+این دستور در چت agent اجرا می‌شود، نه shell. پیش‌نیاز بررسی، packet مشخص از
+scope، out-of-scope، profile و acceptance، نتیجهٔ Agent Main، فایل‌های تغییرکرده،
+diff و evidence تازهٔ verification است. خروجی هفت expert مستقل و Customer در صورت
+فعال‌شدن نیز باید در fan-in ثبت شود؛ evidence امنیت، parity، contract و budget
+فقط در صورت ارتباط و وجود مقدار واقعی لازم است. نصب skill به‌خودی‌خود Botهای
+میزبان یا دسترسی لازم را فراهم نمی‌کند؛ seat غایب باید صریحاً missing/degraded باشد.
+
+برای نمونه، همراه درخواست بالا مسیر artifactهای نتیجه و تست، معیار پذیرش،
+profile=`standard` و findingهای باز را ارائه کنید. نام یک command یا برنامهٔ
+اجرای تست، نتیجهٔ واقعی محسوب نمی‌شود.
 
 ## حالت‌های بررسی
 
@@ -116,6 +127,28 @@ JudgeVerdict
 است که scope و cross-section کامل باشند، gateهای ضروری پاس شده باشند و finding
 blocking باز وجود نداشته باشد. پس از accept حداکثر پنج next action معتبر و خارج
 از scope نمایش داده می‌شود.
+
+گزارش به‌صورت JSON یا جدول evidence-first ارائه می‌شود و حداقل `verdict`،
+`lifecycle`، `profile`، `scope`، `relevanceMask`، `rubricStatus`، `findings`،
+`failureScenario`، `newEvidence`، `openFindings`، `completionEnvelope`،
+`resumeCondition` و `nextAction` را دارد. lifecycle با verdict یکی نیست.
+نام هر هفت handle، relevance، position و evidence آن‌ها و owner بالادستی
+Karavi باید دیده شود. در profileهای standard/critical حداقل یک مسیر منفی
+واقعاً اجرا یا evidence آن بازرسی می‌شود؛ محیط ناموجود PASS نیست.
+
+برای بررسی گزارش، [قرارداد evidence](references/evidence-contract.md) و
+[envelope](references/completion-envelope.md) را با ورودی تطبیق دهید؛ فقط delta
+نسبت به verdict قبلی دوباره بررسی می‌شود. در `judge-plan-loop` سقف cycleها
+`quick=2`، `standard=4` و `critical=6` است و هر finding حداکثر دو تلاش اصلاح
+توسط Agent Main دارد؛ Judge اصلاح‌کننده نیست.
+
+ابهام منبع: بخش Verdict algorithm در `SKILL.md` خروجی دقیقاً یکی از
+`accept|block|fail` می‌خواهد، اما برای finding فنی معمولاً `decision-required`
+توصیه می‌کند؛ بخش circuit breaker نیز `block|fail` را بدون شرط صریح hard stop
+می‌آورد. `decision-required` را وضعیت/action همراه decision packet ثبت کنید،
+نه verdict چهارم، و این تعارض را در گزارش نگه دارید؛ از آن مجوز توقف یا accept
+بدون evidence نسازید.
+
 
 ## مرز ایمنی
 

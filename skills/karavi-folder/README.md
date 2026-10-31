@@ -61,7 +61,9 @@ do not invent a destination; use the ownership matrix in
 When running `init` or `create`, any existing folders inside `karavi/` with legacy or variant names
 (e.g., `docs`, `prompts`, `history`, `deploy`, `scripts/command`, `logs`, `status`, `build`, `assets`,
 `mockup`, `business`, `customer`, `social`, `karavi.SociaMediaContent`, `OnlineContent`, `wordpress`, `linkedin`) are **automatically detected, renamed, and relocated**
-into the new standard structure without deleting or losing any content.
+into the canonical structure. File collisions are preserved under unused
+`.legacy-N` names and must be listed in the report; inspect content inventories
+instead of treating a successful script exit as proof that migration is complete.
 
 ---
 
@@ -73,16 +75,22 @@ Initialize or update the karavi structure in **every** repository:
 /karavi-folder init
 ```
 
-Persian: `/karavi-folder شروع` یا `/karavi-folder ایجاد و بازسازی`. Idempotent, safe, and repairs existing legacy structures.
+Persian: `/karavi-folder شروع` یا `/karavi-folder ایجاد و بازسازی`. Initialization
+is intended to be idempotent; verify migration, collision handling, and rule loaders.
 
 ---
 
 ## Installation
 
 ```bash
-npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
+pnpm dlx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
 ```
 ---
+
+Use an agent with access to the current repository and permission for the requested
+workspace changes. PowerShell is needed only for the supplied automation helpers.
+Do not import another repository's `karavi/` tree. This is not general application
+scaffolding, long-term memory, or authorization to deploy or mutate Git.
 
 ## Invocation
 
@@ -91,7 +99,7 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
 | `/karavi-folder init` | Full initialization (21 folders/subfolders) + migrate legacy folders (Default) |
 | `/karavi-folder init --core` | Core initialization (10 folders) + migrate legacy folders |
 | `/karavi-folder create` | Full structure creation & migration (Default) |
-| `/karavi-folder clean` | Clear temp.logs + temp.status |
+| `/karavi-folder clean` | Remove matching temporary junk in temp.logs + temp.status, not every file |
 | `/karavi-folder clean --deep` | Also clear temp.deploy + temp.build + stack caches |
 | `/karavi-folder clean --what-if` | Dry-run preview, deletes nothing |
 
@@ -110,9 +118,51 @@ npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-folder
 
 ## Safety
 
-This skill **never deletes** source, config without secrets, `karavi.history/`,
-`karavi.deploy.config/`, documentation, or README files. Only the four `karavi.temp.*` folders
-and caches are deletable. It is idempotent and supports dry-run preview (`--what-if`).
+The required preservation policy protects source, canonical rules, configuration,
+history, documentation, README files and `.gitkeep` sentinels. This policy must be
+enforced by the agent; the cleanup helper does not guarantee it recursively.
+In deep mode, the helper recursively removes children of temporary build/deploy
+directories and repo-level output targets without checking every descendant
+against the preserve list. Inspect all descendants before deletion; if a target
+contains protected content, do not run the helper against that unsafe target.
+
+Cleanup under `karavi/` is limited by policy to the four temporary folders; deep
+mode additionally considers generated repo-level outputs and stack caches listed
+in [cleanup.md](references/cleanup.md), never all of `node_modules/`. Resolve
+targets inside the current repository and reject preserved or out-of-root paths.
+
+Run `/karavi-folder clean --what-if` first, show the exact target list, and require
+explicit deletion approval unless already authorized in the invocation. A dry-run
+does not prove that deletion occurred. Default logs/status filtering is
+non-recursive; nested prompt run artifacts require the
+[`karavi-prompt` purge workflow](../karavi-prompt/README.md).
+
+## Outputs and verification
+
+Initialization creates the requested canonical paths, `.gitkeep` sentinels and the
+managed `.gitignore` block, and reports legacy moves and collisions. Automation
+does not consolidate rule semantics: the agent must inspect rules, repair loaders
+and verify versionability using the
+[project-rule procedure](references/folders.md#project-rule-consolidation-mandatory-agent-procedure).
+Compare pre/post inventories and content, check all requested paths and loader
+targets, and establish idempotency without duplicating rules. A preview or
+`-NoMigrate` run is not full migration acceptance.
+
+The cleanup contract calls for removed file/directory counts, but the helper
+prints completion and some per-target messages, not aggregate counters. The agent
+must collect actual counts independently and inspect skipped or locked targets
+before claiming the requested cleanup completed. Its documented exit codes are:
+
+| Code | Cleanup meaning |
+|---|---|
+| `0` | Cleanup complete |
+| `1` | Repository root not found |
+| `2` | User declined the preview |
+| `3` | Preserved or out-of-repository target refused |
+
+These are the cleanup contract, not generic codes for every script. Consult the
+actual helper parameters before direct invocation; chat `--what-if` and `--deep`
+are not PowerShell argument spelling.
 
 ---
 
@@ -122,7 +172,7 @@ and caches are deletable. It is idempotent and supports dry-run preview (`--what
 - [`SKILL.md`](./SKILL.md) — entry point / decision core & AI directives
 - [`references/folders.md`](./references/folders.md) — Section 1 mechanics & migration map
 - [`references/cleanup.md`](./references/cleanup.md) — Section 2 mechanics
-- [`scripts/`](./scripts/) — PowerShell automation helpers (`init.ps1`, `create.ps1`, `clean.ps1`)
+- [`scripts/`](./scripts/) — PowerShell helpers (`karavi-folder.init.ps1`, `karavi-folder.create.ps1`, `karavi-folder.clean.ps1`)
 
 ---
 

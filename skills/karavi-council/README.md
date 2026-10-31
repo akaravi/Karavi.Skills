@@ -22,8 +22,13 @@
 ## نصب
 
 ```bash
-npx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-council
+pnpm dlx skills add https://github.com/akaravi/Karavi.Skills --skill karavi-council
 ```
+
+پیش‌نیاز اجرا، agent میزبان با دسترسی خواندن repository و امکان نوشتن artifactهای
+planning است. قبل از فراخوانی seatها، adapter میزبان، قرارداد CLI و resilience را
+بخوانید؛ قابلیت و احراز هویت ابزارها باید بررسی و محدودیت واقعی ثبت شود.
+این skill برای تغییر کوچک، برگشت‌پذیر و دارای مسیر verification روشن لازم نیست.
 
 ## استفاده
 
@@ -57,7 +62,8 @@ docs/planning/<YYYY-MM-DD>-<slug>/
 ├── 06-spec.md
 ├── 07-plan.md
 ├── 08-readiness.md
-└── _work/                 transcript و خروجی‌های میانی
+├── _transcript/           نسخهٔ قابل‌ممیزی prompt و reply هر seat
+└── _work/                 خروجی‌های میانی؛ باید gitignored باشد
 ```
 
 هر Part باید scope، prerequisite، dependency، owner، فایل‌های دقیق، action،
@@ -65,13 +71,15 @@ expected result، verify method، rollback و completion criteria داشته ب�
 
 ## خودکارسازی تصمیم و مرز Block
 
-- تصمیم فنی داخل scope با Agent Main و بر اساس evidence گرفته و اجرا می‌شود.
-- اختلاف advisory، findingهای `info|low|medium` و in-scope improvement به‌صورت
-  finding یا route ثبت می‌شوند و به‌تنهایی workflow را متوقف نمی‌کنند.
+- Agent Main تصمیم‌های فنی داخل scope را با evidence هدایت می‌کند؛ تصمیم مورد
+  اختلاف به Principal تعلق دارد و Adversary فقط advisory است. فقط Chair artifact می‌نویسد.
+- اختلاف advisory، findingهای `info|low|medium` و in-scope improvement ثبت و route
+  می‌شوند و به‌تنهایی workflow را متوقف نمی‌کنند.
 - new-scope جداگانه گزارش می‌شود و بدون دستور اجرا نمی‌شود.
-- فقط defect اثبات‌شدهٔ `high|critical`، نبود prerequisite/evidence ضروری یا
-  تصمیم واقعاً user-owned می‌تواند Block ایجاد کند.
-- نبودن seat اختیاری با وضعیت `degraded` ثبت می‌شود؛ نتیجهٔ ساختگی تولید نمی‌شود.
+- defect اثبات‌شدهٔ `high|critical` یا نبود prerequisite/evidence ضروری ابتدا
+  decision packet با گزینه‌ها، owner، action، verification و residual risk می‌سازد؛
+  وضعیت فعال `decision-required` است. توقف فقط برای hard safety/authorization است.
+- نبودن seat با وضعیت `degraded` ثبت می‌شود؛ نتیجهٔ ساختگی تولید نمی‌شود.
 - سؤال کاربر فقط برای تصمیمی مجاز است که هم blocking و غیرقابل استنتاج باشد،
   هر دو مسیر فنی نتوانند resolve کنند و هزینهٔ خطا مادی باشد.
 
@@ -80,6 +88,23 @@ expected result، verify method، rollback و completion criteria داشته ب�
 این skill مجوز implementation، commit، push، merge، Deploy، FTP، تغییر production،
 دریافت secret یا گسترش scope را ایجاد نمی‌کند. در پایان readiness، plan و blockerهای
 واقعی تحویل داده می‌شوند و اجرای کد به مرحلهٔ جداگانه منتقل می‌شود.
+
+## بررسی readiness و ادامهٔ کار
+
+هر هشت مرحلهٔ 0 تا 7 اجرا می‌شوند؛ `quick|standard|critical` حجم بررسی را تغییر
+می‌دهد، نه حذف gateها را. برای بررسی خروجی، [checklist readiness](references/quality-gates.md)
+را با artifactها تطبیق دهید: هر requirement باید به specification و Part برسد،
+dependencyها acyclic باشند، تصمیم‌ها و dissent ثبت شوند و simulation تازهٔ
+Partهای پرریسک و دارای dependant حدس حل‌نشده نداشته باشد. این evidence آمادگی
+plan است، نه ادعای پاس‌شدن تست implementation.
+
+در resume ابتدا `_state.md` و transcriptها خوانده می‌شوند؛ حافظهٔ session جایگزین
+artifact نیست. گزارش نهایی باید roster واقعی، محدودیت degraded، ریسک، مسیر plan
+و مرحلهٔ بعدی مجاز را نشان دهد. `SKILL.md` در Phase 4 برای نبود Principal
+`provisional-decision` و ادامهٔ کار غیرمخرب را مجاز می‌داند، اما جدول Red flags
+همان مورد را توقف در Phase 4 می‌نامد؛ این ناسازگاری منبع باید صریح گزارش شود،
+نه اینکه رأی Principal جعل یا run به‌عنوان PASS عادی معرفی شود.
+
 
 ## منابع
 
