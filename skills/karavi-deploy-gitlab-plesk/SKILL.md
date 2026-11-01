@@ -21,26 +21,40 @@ Use this skill to build an automated, repeatable, and fast GitLab CI/CD to Plesk
 - Migrating existing GitHub Actions / FTP deployments to a private, self-hosted GitLab + Plesk infrastructure.
 - Setting up direct Git-branch continuous deployment where Plesk automatically pulls upon webhook triggers without intermediate `.zip` artifacts.
 
-## Binding Agent Prompt: Publish Pipeline
+## Prompt Engineering & Master Prompt Architecture
 
-When generating, editing, or reviewing `.gitlab-ci.yml`, apply this contract before the deployment procedure. Read [workflow-contract.md](references/workflow-contract.md) for the rules, health probe example, and acceptance scenarios.
+When designing, generating, refactoring, or reviewing `.gitlab-ci.yml`, adhere to the Master Prompt and specialized prompt contracts cataloged in [references/prompts.md](references/prompts.md). Read [workflow-contract.md](references/workflow-contract.md) for detailed stage barriers, DAG dependencies, health probe examples, and failure matrices.
 
-**Objective:** Produce a publish-tag pipeline with exactly `test -> build -> health`, preserving the project's application commands and deployment targets.
+### Topologies Supported by the Master Prompt
 
-| Requirement | Binding instruction |
-|---|---|
-| Trigger | Create this release pipeline only when `$CI_COMMIT_TAG == "publish"`. `publish` means the exact Git tag, not a runner tag, branch, job name, or commit-message keyword. Reject branch pushes, other tags, MR, schedule, web, and API pipeline sources. |
-| Stages | Declare exactly `test`, `build`, `health`, in that order. Migrate former `publish` jobs into `build` and former `health_check` jobs into `health`; do not add extra stages. |
-| Test gate | Run every project-required test before any build/deployment starts. No `allow_failure`, manual gates, or dependency shortcuts that bypass required tests. |
-| Build gate | Compile, clean the payload, push to the dedicated Plesk branch, and require webhook HTTP 204 inside `build`. Every build/deployment must succeed before `health` starts. |
-| Health gate | For every deployed API, use configured canonical URLs to GET both Health and Swagger. Require HTTP 200, the project's healthy response contract, a working Swagger UI, and a valid OpenAPI/Swagger JSON document. Root-page 200 or webhook 204 alone is not success. |
-| Failure | Use bounded readiness retries, connection/request timeouts, and verified TLS. Missing configuration, exhausted retries, unhealthy payloads, and invalid Swagger fail the job and pipeline. Do not use `allow_failure`, `when: always`, `curl -k`, or `|| true` to hide failures. |
-| Evidence | Record the tag/source, stage graph, required job outcomes, and redacted per-target probe outcomes; never record credentials, webhook query strings, or raw response bodies. |
+1. **Profile A: Monorepo Multi-Target DAG Pipeline (`validate -> test -> build -> deploy -> health-check`)**
+   - Designed for repositories containing multiple application stacks: frontend SPAs (Angular admin, panel, website), backend services (.NET API, Auth, CDN), and client apps (Flutter app, agent).
+   - Uses GitLab DAG (`needs:`) so independent service tracks (e.g. .NET API vs Angular Web) build, deploy, and health-check without waiting for unrelated stacks.
+   - Segregates client/mobile packages (Flutter APK/binaries) to a non-Plesk `release` target, while web/API components deploy to Plesk.
 
-**Execution boundary:** This skill update or a request to generate CI is not permission to create/move the `publish` tag, push, trigger a pipeline, or Deploy. Obtain the independently required authorization before side effects.
+2. **Profile B: Lean Strict Publish Pipeline (`test -> build -> health`)**
+   - Designed for single-purpose or unified deployments triggered strictly on Git tag `$CI_COMMIT_TAG == "publish"`.
+   - Zero-Zip architecture: compilation, server-config stripping, direct branch push (`plesk/*`), and webhook call happen within `build` to eliminate intermediate runner artifacts.
 
-**Output contract:** Return the changed CI paths, discovered test/build commands, target-to-probe mapping, validation results, and unresolved prerequisites. Do not claim release success until all required probes pass. Do not invent URLs or relax production authentication to make Swagger pass.
+### Binding Architecture Matrix
 
+| Dimension | Profile A: Monorepo Multi-Target (DAG) | Profile B: Lean Strict Publish |
+|---|---|---|
+| **Stages** | `validate -> test -> build -> deploy -> health-check` | `test -> build -> health` |
+| **Trigger** | Tag `publish` or targeted manual/protected branch trigger | Strictly `$CI_COMMIT_TAG == "publish"` |
+| **Execution Flow** | DAG via `needs:` (parallel independent pipelines) | Strict stage barriers (stage N gates stage N+1) |
+| **Matrix Jobs** | Yes (`parallel: matrix` for Angular apps, .NET services, Flutter) | Single-target or uniform loop |
+| **Client Apps (Flutter)** | Segregated to `release` (GitLab Package/Release Registry) | N/A (Web & API only) |
+| **Plesk Deploy** | Direct push to `plesk/<slug>` + Webhook HTTP 204 | Direct push to `plesk/<slug>` + Webhook HTTP 204 |
+| **Health Check** | Per-service probe jobs for API, Auth, CDN, and Web targets | Unified/per-target health probes in `health` |
+
+**Non-Negotiable Invariants:**
+- **Git Transport:** All Git connections to `git.ntk.ir` MUST use SSH scp-style (`git@git.ntk.ir:<namespace>/<repo>.git`). HTTPS Git URLs are forbidden for `git.ntk.ir`.
+- **Server-Owned Config Immunity:** Payload MUST delete `appsettings*.json`, `web.config`, `NLog*.config`, and `.env*` before branch push.
+- **Plesk Webhook 204:** Call with `-X POST -d ""` requiring exact HTTP 204.
+- **Health & Swagger Gate:** Every deployed API must pass Health HTTP 200 (exact body contract), Swagger UI HTTP 200, and valid OpenAPI JSON parsing.
+
+**Execution Boundary:** Generating or updating CI files is never authorization to push Git branches, create tags, or trigger live deployments. Live deployment actions require explicit user authorization.
 ## Prerequisites
 
 1. **GitLab Project:** Project repository on GitLab (e.g. `git.ntk.ir/<group>/<project>`).

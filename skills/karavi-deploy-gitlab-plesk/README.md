@@ -23,9 +23,11 @@ This changes the local skill catalog, not GitLab Runner, Docker, Plesk, or appli
 
 ## Supported release contract
 
-- **Release trigger:** Only a Git push of the exact, case-sensitive tag `publish`; no branch, arbitrary/version tag, MR, schedule, web, or API trigger.
-- **Pipeline stages:** Exactly `test -> build -> health`. Publishing happens inside `build`; no separate `publish` or `health_check` stage.
-- **Health gate:** After every build succeeds, validate each API's configured Health response, Swagger UI, and Swagger/OpenAPI JSON using bounded GET probes. Any failure fails the pipeline.
+- **Release profiles:**
+  - **Profile A (Monorepo Multi-Target DAG):** `validate -> test -> build -> deploy -> health-check` with matrix parallelism, DAG dependencies, client package release separation (Flutter), and per-target health checks.
+  - **Profile B (Lean Strict Publish):** Exactly `test -> build -> health` triggered on exact tag `publish`.
+- **Master Prompt & Engineering Prompts:** Complete armed prompt catalog in [references/prompts.md](references/prompts.md).
+- **Health gate:** After deployment succeeds, validate each API's configured Health response, Swagger UI, and Swagger/OpenAPI JSON using bounded GET probes. Any failure fails the pipeline.
 - **CI/CD Host:** GitLab (cloud or self-hosted, e.g. `git.ntk.ir`).
 - **Runner architecture:** GitLab Runner with `executor = "docker"`; registry mirrors in the runner reference are restricted-network setup examples, not a universal prerequisite or availability guarantee.
 - **Plesk branch:** Dedicated orphan deployment branches, e.g. `plesk/<site-slug>`.

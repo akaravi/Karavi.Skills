@@ -4,8 +4,9 @@
 
 Generate or migrate the project's release pipeline; do not copy application paths or domains from another project. Discover required test commands, build commands, deployment branches, canonical target URLs, and the Health response format from project configuration. Preserve server-owned files and the existing no-zip deployment architecture.
 
-The required pipeline is `test -> build -> health`. Publishing is work inside `build`, not a fourth stage. Rename old `publish` stages to `build` and `health_check` stages to `health`. Job names may remain project-specific.
-
+The skill supports two pipeline architectures:
+1. **Profile A (Monorepo Multi-Target DAG):** `validate -> test -> build -> deploy -> health-check` for projects with multi-platform targets (Angular, .NET, Flutter). Independent tracks run via `needs:` without blocking unrelated stacks, and mobile/client builds (Flutter) are routed to release registry rather than Plesk.
+2. **Profile B (Lean Strict Pipeline):** `test -> build -> health` for single-target or unified releases triggered strictly on Git tag `$CI_COMMIT_TAG == "publish"`. Publishing is work inside `build`, not a fourth stage.
 ## Exact publish trigger and stage barriers
 
 Use this release configuration:
