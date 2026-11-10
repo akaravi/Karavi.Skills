@@ -106,6 +106,65 @@ material user-owned choice.
 12. Run `karavi-judge` with fresh evidence. Do not claim completion until its
     verdict is `accept` and the Completion Envelope is recorded.
 
+## Karavi Multi-Host Operating Contract
+
+- Treat both `git.ntk.ir` and `github.com/akaravi` as supported canonical
+  remotes. Discover the exact repository, project root, runtime, and target
+  domain from repository evidence and Plesk; never infer a domain from a
+  repository name.
+- Search the configured Karavi source roots (`GitHub`,
+  `GitHub.CleanArchitecture`, and `GitNtkCms`) before editing. A root may
+  contain several projects, so record the selected local path and remote
+  without exposing credentials.
+- Maintain a dedicated least-privilege SSH credential for Plesk-to-repository
+  access. Its approved validity must be at least 365 days; record only an
+  identifier, scope, creation/expiry dates, and rotation owner. Store private
+  material in the approved vault or provider UI, verify host keys, and alert
+  before expiry. Never put an SSH token/key in a remote URL, workflow, log, or
+  skill.
+- In Plesk, enumerate domains/subdomains and map each repository to the domain
+  whose Git card and deployment directory are read back from the UI. The
+  directory selector is authoritative; stop on an ambiguous mapping.
+- After automatic deployment is enabled, extract the Plesk webhook URL only
+  into an approved secret/CI variable. Call it with `POST` and an empty body,
+  require exact HTTP 204, and verify the resulting commit/deployment
+  asynchronously; 204 is acknowledgement, not health proof.
+
+## Validated Multi-Target Pattern
+
+Adopt the redacted multi-target pattern used by the companion GitLab skill:
+map each surface (`site`, `admin`, `api`, `auth`, `cdn`, `staging`, or `app`)
+to one dedicated deployment branch, protected webhook, deployment path, and
+health probe. Keep the target matrix and payload filtering provider-neutral;
+never copy live webhook identifiers, domains, tokens, or repository paths from
+another project.
+
+## Windows/IIS Zero-Lock Lifecycle
+
+For a Windows Plesk repository, follow
+`references/windows-lock-lifecycle.md`. Install `.git/hooks/pre-merge-commit`
+with LF line endings and this exact lifecycle: write
+`app_offline.htm` containing `Updating application...`, wait two seconds, let
+the merge/pull overwrite files, then run the configured post-deployment action
+`if exist app_offline.htm del /f /q app_offline.htm`. Verify creation before
+overwrite, a lock-free controlled pull, and cleanup after both success and the
+configured failure path. A fast-forward pull does not invoke
+`pre-merge-commit`; when that path is observed, use the Plesk pre-deployment
+action or an equivalent deployment wrapper rather than claiming the hook ran.
+
+## Failure Repair and Notification
+
+When CI, Plesk pull, webhook, or smoke verification fails, preserve redacted
+evidence, identify the root cause, and inspect the corresponding local source
+under the configured roots. Make the smallest tested source/workflow fix; run
+the relevant tests and security scan before any remote mutation. Push, create or
+move the exact `publish` tag, invoke the webhook, and redeploy only after the
+user has explicitly authorized that release action. If Telegram is connected,
+send a concise redacted incident/remediation update with repository, commit,
+tests, deployment result, and residual risk; never send secrets or raw logs.
+If a dashboard login, 2FA, or vault action is required, stop and tell the user
+which dashboard and single access step is needed.
+
 ## Quick Reference
 
 ```text

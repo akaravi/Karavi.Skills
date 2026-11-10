@@ -173,6 +173,61 @@ Always invoke via:
 code=$(curl --silent --connect-timeout 5 --max-time 15 -X POST -d "" -o /dev/null -w '%{http_code}' "$PLESK_WEBHOOK_URL" 2>/dev/null) && test "$code" = 204
 ```
 
+## Karavi Multi-Host Operating Contract
+
+- Treat both `git.ntk.ir` and `github.com/akaravi` as supported canonical
+  remotes. For GitLab projects, use only the verified scp-style SSH remote;
+  GitHub remains a supported source for the companion deployment skill.
+- Search the configured Karavi source roots (`GitHub`,
+  `GitHub.CleanArchitecture`, and `GitNtkCms`) before editing. Discover the
+  exact project, namespace, runtime, and target domain; do not infer a Plesk
+  domain from a repository name.
+- Maintain a dedicated least-privilege SSH credential for Plesk-to-repository
+  access. Its approved validity must be at least 365 days; record only an
+  identifier, scope, creation/expiry dates, and rotation owner. Store private
+  material in the approved vault or provider UI, verify host keys, and alert
+  before expiry. Never place an SSH token/key in a remote URL, CI file, log, or
+  skill.
+- Enumerate Plesk domains/subdomains and map each repository to the domain
+  whose Git card and directory selector are read back from Plesk. Stop on an
+  ambiguous mapping. Keep each extracted webhook URL only in a protected
+  variable; invoke it with an empty-body POST and require exact HTTP 204.
+
+## Validated Project Pattern
+
+Use `references/validated-patterns.md` as the redacted pattern catalog from
+the known-good GitLab projects. The preferred shape is a target matrix:
+validate manifests, run backend/frontend tests, build each surface, push only
+the matching `plesk/<surface>` branch, call that surface's protected webhook,
+then run a bounded health gate. Reuse the structure, not live URLs, UUIDs,
+tokens, domains, or repository-specific paths.
+
+## Windows/IIS Zero-Lock Lifecycle
+
+For a Windows Plesk repository, follow
+`references/windows-lock-lifecycle.md`. Install `.git/hooks/pre-merge-commit`
+with LF line endings and this exact lifecycle: write
+`app_offline.htm` containing `Updating application...`, wait two seconds, let
+the merge/pull overwrite files, then run the configured post-deployment action
+`if exist app_offline.htm del /f /q app_offline.htm`. Verify creation before
+overwrite, a lock-free controlled pull, and cleanup after both success and the
+configured failure path. A fast-forward pull does not invoke
+`pre-merge-commit`; when that path is observed, use the Plesk pre-deployment
+action or an equivalent deployment wrapper rather than claiming the hook ran.
+
+## Failure Repair and Notification
+
+When CI, Plesk pull, webhook, or health verification fails, preserve redacted
+evidence, identify the root cause, and inspect the corresponding local source
+under the configured roots. Make the smallest tested source/workflow fix; run
+the relevant tests and security scan before any remote mutation. Push, create or
+move the exact `publish` tag, invoke the webhook, and redeploy only after the
+user has explicitly authorized that release action. If Telegram is connected,
+send a concise redacted incident/remediation update with repository, commit,
+tests, deployment result, and residual risk; never send secrets or raw logs.
+If a dashboard login, 2FA, or vault action is required, stop and tell the user
+which dashboard and single access step is needed.
+
 ---
 
 ## Verification & Acceptance Checklist

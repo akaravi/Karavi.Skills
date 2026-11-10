@@ -13,6 +13,7 @@ scope:
   pipelineSource: push
   pleskBranch: plesk/<domain-slug>
   deploymentPath: <exact path in Plesk, e.g. \httpdocs>
+  sourceRoot: <configured local root and project path>
 evidence:
   gitlabPipelineId: <pipeline-id>
   pipelineStatus: <observed status or not-run>
@@ -44,11 +45,19 @@ evidence:
     branch: plesk/<domain-slug>
     deploymentMode: Automatic
     latestCommitSha: <sha>
+  sshCredential: <redacted id, scope, expiry, rotation owner; validity >=365 days>
+  domainMapping: <Plesk domain/subdomain and repository card read-back>
+  zeroLockLifecycle:
+    hook: <installed and LF-verified or not-run>
+    offlineBeforeOverwrite: <passed or not-run>
+    lockFreePull: <passed or not-run>
+    cleanupAfterDeployment: <passed or not-run>
   publicSmoke:
     status: 200
     checkedEndpoints:
       - https://<domain-name>/
       - https://<domain-name>/assets/version.json
+  remediationNotification: <Telegram redacted update sent or not-run>
 findings: []
 residualRisk: none
 judgeVerdict: <actual independent verdict or not-run>
